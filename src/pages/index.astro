@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import EarthCanvas from '../components/EarthCanvas.tsx';
+---
+
+<Layout title="Data Pilot | Command">
+  <EarthCanvas client:only="react" />
+
+  <main class="relative h-screen w-full flex items-center justify-end px-24 overflow-hidden">
+    <div class="z-10 text-right animate-fade-in">
+      <h1 class="text-9xl md:text-[12rem] font-black tracking-tighter text-white drop-shadow-2xl leading-[0.8] uppercase">
+        ABHI<br/>
+        <span class="text-blue-500 italic">ram</span>
+      </h1>
+      <p class="text-gray-500 tracking-[0.6em] text-xs mt-8 uppercase font-light">
+        Purdue University Fort Wayne
+      </p>
+      <p class="text-blue-400/40 tracking-[0.4em] text-[10px] mt-2 uppercase font-mono italic">
+        M.S.
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .animate-fade-in {
+    animation: fadeIn 2s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { 
+      opacity: 0; 
+      transform: translateX(50px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateX(0); 
+    }
+  }
+</style>

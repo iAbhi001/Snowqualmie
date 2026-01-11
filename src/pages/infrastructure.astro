@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CostMonitor from '../components/CostMonitor.astro';
+---
+
+<Layout title="Cloud Ops | Infrastructure">
+  <main class="min-h-screen w-full bg-[#010206] flex flex-col items-center pt-32 px-12">
+    <div class="max-w-xl w-full">
+      <header class="text-center mb-16">
+        <h1 class="text-white font-black text-5xl tracking-tighter uppercase mb-4">Cloud <span class="text-blue-500 italic">Expenditure</span></h1>
+        <div class="h-1 w-24 bg-blue-600 mx-auto rounded-full"></div>
+      </header>
+
+      <div class="glass-card p-10 bg-white/5 border border-white/10 rounded-[3rem] backdrop-blur-3xl shadow-2xl">
+        <CostMonitor />
+      </div>
+    </div>
+  </main>
+</Layout>

@@ -1,0 +1,37 @@
+---
+const indices = [
+  { name: 'S&P 500', value: '5,204.34', change: '+0.45%' },
+  { name: 'NASDAQ', value: '16,332.56', change: '+1.12%' },
+  { name: 'BTC/USD', value: '$67,402', change: '-2.4%' }
+];
+---
+<div class="glass-card">
+  <h4 class="text-[10px] uppercase font-bold text-blue-400 mb-4 tracking-tighter">Live Market Indices</h4>
+  <div class="space-y-4">
+    {indices.map((index) => (
+      <div class="flex justify-between items-center border-b border-white/5 pb-2">
+        <span class="text-sm font-medium">{index.name}</span>
+        <div class="text-right">
+          <div class="text-sm font-mono">{index.value}</div>
+          <div class={`text-[10px] ${index.change.startsWith('+') ? 'text-green-400' : 'text-red-400'}`}>
+            {index.change}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<div class="glass-card w-72">
+  <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-4">Market Indices</p>
+  <div class="space-y-4">
+    <div class="flex justify-between font-mono text-sm">
+      <span>S&P 500</span>
+      <span class="text-green-400">5,823.4 +0.12%</span>
+    </div>
+    <div class="flex justify-between font-mono text-sm">
+      <span>NASDAQ</span>
+      <span class="text-green-400">18,245.2 +0.45%</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@layer components {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2rem;
+    padding: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+}
+
+body {
+  background-color: black;
+  color: white;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+
+/* Import from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Birthstone+Bounce:wght@400;500&display=swap');
+
+.hello-font {
+  font-family: 'Birthstone Bounce', cursive;
+  font-size: 15rem; /* Large and bold for the 'Data Pilot' hero text */
+  color: white;
+  text-shadow: 0 0 40px rgba(59, 130, 246, 0.5); /* Adds that 'Apple' glow */
+  line-height: 1;
+}
