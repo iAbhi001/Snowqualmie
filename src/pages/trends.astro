@@ -1,17 +1,16 @@
 ---
-// src/pages/trends.astro
-import Layout from '../layouts/Layout.astro';
-import SearchableMarketTracker from '../components/SearchableMarketTracker.tsx';
+import Layout from '../layouts/Layout.astro'; // Or whatever your main layout is
+import SearchableMarketTracker from '../components/SearchableMarketTracker';
 ---
 
 <Layout title="Market Trends">
-  <main class="min-h-screen w-full bg-[#010206] flex flex-col items-center pt-24 px-12">
-    <h1 class="text-6xl font-black text-white uppercase tracking-tighter mb-12">
-      Market <span class="text-blue-500 italic">Trends</span>
-    </h1>
-    
-    <div class="glass-card w-full max-w-2xl bg-white/5 border border-white/10 rounded-[2.5rem] backdrop-blur-3xl overflow-hidden">
-      <SearchableMarketTracker client:load />
+  <main class="min-h-screen bg-[#050505] py-20 px-4">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-white text-6xl font-black uppercase italic mb-12 text-center">
+        Market <span class="text-blue-500">Trends</span>
+      </h1>
+      
+      <SearchableMarketTracker client:only="react" />
     </div>
   </main>
 </Layout>

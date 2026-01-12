@@ -1,26 +1,32 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async ({ url }) => {
-  // Use the key exactly as it appears in your .env
-  const apiKey = import.meta.env.POLYGON_API_KEY || "j3MOp6wDdENRmQgnVeM4kLFaAAi_zp16";
-  const symbols = url.searchParams.get('symbols');
+  const apiKey = import.meta.env.API_KEY;
+  const symbol = url.searchParams.get('symbol')?.toUpperCase();
 
-  if (!symbols) return new Response(JSON.stringify({ tickers: [] }));
+  // If SSR is off, this check triggers the 400 Bad Request you see in the image
+  if (!symbol) {
+    return new Response(JSON.stringify({ error: 'NO SYMBOL' }), { status: 400 });
+  }
+
+  const apiURL = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
 
   try {
-    // Direct fetch to the Polygon/Massive Snapshot API
-    // This bypasses SDK version mismatches and handles batching
-    const response = await fetch(
-      `https://api.polygon.io/v2/snapshot/locale/us/markets/stocks/tickers?tickers=${symbols}&apiKey=${apiKey}`
-    );
-    
+    const response = await fetch(apiURL);
     const data = await response.json();
 
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: 'LTP Fetch Failed', details: e }), { status: 500 });
+    if (data.Note) return new Response(JSON.stringify({ error: 'RATE LIMIT' }), { status: 429 });
+
+    const quote = data['Global Quote'];
+    if (!quote || !quote['05. price']) {
+       return new Response(JSON.stringify({ error: 'NOT FOUND' }), { status: 404 });
+    }
+
+    return new Response(JSON.stringify({
+      price: quote['05. price'],
+      changePercent: quote['10. change percent']
+    }), { status: 200 });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: 'SERVER ERROR' }), { status: 500 });
   }
-}
+};

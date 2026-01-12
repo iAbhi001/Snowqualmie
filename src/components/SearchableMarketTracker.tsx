@@ -1,111 +1,166 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, Moon, Search } from 'lucide-react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef
+} from 'react';
+import { Plus, Trash2, Search, RefreshCw } from 'lucide-react';
+
+type MarketQuote = {
+  price: string | null;
+  changePercent?: string;
+  error?: string;
+};
 
 export default function SearchableMarketTracker() {
   const [query, setQuery] = useState('');
-  const [marketData, setMarketData] = useState<any[]>([]);
-  const [watchlist, setWatchlist] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('massive-watchlist');
-      
-      return saved ? JSON.parse(saved) : [{ symbol: 'AAPL' }, { symbol: 'TSLA' }];
-    }
-    return [];
-  });
+  const [watchlist, setWatchlist] = useState<string[]>([]);
+  const [marketData, setMarketData] = useState<Record<string, MarketQuote>>({});
+  const [status, setStatus] = useState<'Ready' | 'Syncing' | 'Updated'>('Ready');
 
-  const pullLiveFeed = useCallback(async () => {
-    if (watchlist.length === 0) return;
-    
-    const tickers = watchlist.map((s: any) => s.symbol).join(',');
-    
-    try {
-      const res = await fetch(`/api/market?symbols=${tickers}`);
-      const json = await res.json();
-      // Massive Snapshot returns the data inside a 'tickers' array
-      setMarketData(json.tickers || []);
-    } catch (e) {
-      console.error("API Update failed - Check console for network errors");
-    }
-  }, [watchlist]);
+  // prevents overlapping sync loops
+  const syncingRef = useRef(false);
 
+  /* ------------------ INIT ------------------ */
   useEffect(() => {
-    pullLiveFeed();
-    localStorage.setItem('massive-watchlist', JSON.stringify(watchlist));
-    // 60s interval stays well within your 5 calls/min individual limit
-    const interval = setInterval(pullLiveFeed, 60000); 
-    return () => clearInterval(interval);
-  }, [watchlist, pullLiveFeed]);
+    const saved = localStorage.getItem('alpha-watchlist');
+    if (saved) {
+      setWatchlist(JSON.parse(saved));
+    }
+  }, []);
 
-  const handleAdd = () => {
-    const upper = query.toUpperCase().trim();
-    if (upper && !watchlist.find((s: any) => s.symbol === upper)) {
-      setWatchlist([...watchlist, { symbol: upper }]);
-      setQuery('');
+  /* ------------------ API ------------------ */
+  const fetchSingleSymbol = async (symbol: string) => {
+    try {
+      const res = await fetch(`/api/market?symbol=${symbol}`);
+      const json = await res.json();
+
+      setMarketData(prev => ({
+        ...prev,
+        [symbol]: json
+      }));
+    } catch {
+      setMarketData(prev => ({
+        ...prev,
+        [symbol]: { price: null, error: 'NETWORK ERROR' }
+      }));
     }
   };
 
+  const fetchSequentially = useCallback(async (symbols: string[]) => {
+    if (syncingRef.current || symbols.length === 0) return;
+
+    syncingRef.current = true;
+    setStatus('Syncing');
+
+    for (let i = 0; i < symbols.length; i++) {
+      await fetchSingleSymbol(symbols[i]);
+
+      if (i < symbols.length - 1) {
+        await new Promise(r => setTimeout(r, 13000));
+      }
+    }
+
+    setStatus('Updated');
+    syncingRef.current = false;
+  }, []);
+
+  /* ------------------ EFFECT ------------------ */
+  useEffect(() => {
+    localStorage.setItem('alpha-watchlist', JSON.stringify(watchlist));
+
+    if (watchlist.length === 0) {
+      setStatus('Ready');
+      return;
+    }
+
+    fetchSequentially(watchlist);
+  }, [watchlist, fetchSequentially]);
+
+  /* ------------------ ACTIONS ------------------ */
+  const handleAdd = () => {
+    const symbol = query.trim().toUpperCase();
+    if (!symbol || watchlist.includes(symbol)) return;
+
+    setWatchlist(prev => [...prev, symbol]);
+    setMarketData(prev => ({
+      ...prev,
+      [symbol]: { price: null }
+    }));
+    setQuery('');
+  };
+
+  const handleRemove = (symbol: string) => {
+    setWatchlist(prev => prev.filter(s => s !== symbol));
+    setMarketData(prev => {
+      const copy = { ...prev };
+      delete copy[symbol];
+      return copy;
+    });
+  };
+
+  /* ------------------ UI ------------------ */
   return (
-    <div className="flex flex-col w-full bg-[#0a0c10]/90 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl">
-      {/* Search Input */}
-      <div className="p-6 border-b border-white/10 bg-white/[0.02] flex gap-3">
+    <div className="w-full max-w-3xl mx-auto bg-[#0a0c10] text-white rounded-3xl p-8 space-y-8">
+
+      {/* Search */}
+      <div className="flex gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={18} />
-          <input 
-            className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white font-mono text-sm outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Add Ticker (e.g. AAPL, BTC, NVDA)..."
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 opacity-30" />
+          <input
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 outline-none"
+            placeholder="AAPL, TSLA, DJT..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
           />
         </div>
-        <button onClick={handleAdd} className="bg-blue-600 px-6 rounded-2xl hover:bg-blue-500 transition-all text-white">
-          <Plus size={20} />
+        <button
+          onClick={handleAdd}
+          className="bg-blue-600 px-6 rounded-xl font-bold"
+        >
+          <Plus />
         </button>
       </div>
 
-      {/* Ticker List with Correct LTP Mapping */}
-      <div className="p-8 space-y-8 max-h-[500px] overflow-y-auto custom-scrollbar">
-        {watchlist.map((item: any) => {
-          // Find the specific ticker data in the API array
-          const stats = marketData.find((t: any) => t.ticker === item.symbol);
-          
-          /** * LTP DATA PATHING
-           * 1. min.c (Live minute close)
-           * 2. lastTrade.p (Most recent trade price)
-           * 3. prevDay.c (Friday's close - The standard LTP for weekends)
-           */
-          const LTP = stats?.min?.c || stats?.lastTrade?.p || stats?.prevDay?.c || stats?.day?.c;
-          
-          // Calculate change percentage from prevDay if live data is null
-          const change = stats?.todaysChangePerc ?? 0;
-          const isClosed = !stats?.min?.c;
+      {/* Status */}
+      <div className="flex justify-between text-xs uppercase opacity-40">
+        <span>Market Assets</span>
+        <span className="flex items-center gap-2">
+          <RefreshCw
+            size={12}
+            className={status === 'Syncing' ? 'animate-spin' : ''}
+          />
+          {status}
+        </span>
+      </div>
 
+      {/* List */}
+      <div className="space-y-6">
+        {watchlist.map(symbol => {
+          const data = marketData[symbol];
           return (
-            <div key={item.symbol} className="flex justify-between items-center group animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="flex items-center gap-5">
-                <button 
-                  onClick={() => setWatchlist(watchlist.filter((w: any) => w.symbol !== item.symbol))}
-                  className="opacity-0 group-hover:opacity-100 text-red-500/50 hover:text-red-500 transition-all"
+            <div
+              key={symbol}
+              className="flex justify-between items-center"
+            >
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => handleRemove(symbol)}
+                  className="text-red-500/40"
                 >
-                  <Trash2 size={16}/>
+                  <Trash2 />
                 </button>
-                <div className="flex flex-col text-left">
-                  <span className="text-white font-black text-2xl uppercase tracking-tighter leading-none">{item.symbol}</span>
-                  {isClosed && (
-                    <span className="text-[8px] text-blue-400/50 font-mono uppercase tracking-widest mt-1 flex items-center gap-1">
-                      <Moon size={10} /> LTP - Market Closed
-                    </span>
-                  )}
+                <div>
+                  <div className="text-3xl font-black">{symbol}</div>
+                  <div className="text-xs opacity-40">REAL-TIME DATA</div>
                 </div>
               </div>
 
-              <div className="text-right tabular-nums">
-                <p className="text-white font-mono text-3xl tracking-tighter leading-none mb-1">
-                  {LTP ? `$${LTP.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}
-                </p>
-                <div className={`text-[10px] font-bold font-mono inline-block px-2 py-0.5 rounded ${change >= 0 ? 'text-green-400 bg-green-400/10' : 'text-red-500 bg-red-500/10'}`}>
-                  {change >= 0 ? '▲' : '▼'} {Math.abs(change).toFixed(2)}%
-                </div>
+              <div className="text-right font-mono text-4xl font-bold">
+                {typeof data?.price === 'string'
+                  ? `$${data.price}`
+                  : data?.error || 'Syncing...'}
               </div>
             </div>
           );
