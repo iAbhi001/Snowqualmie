@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import PhotoGallery from '../components/PhotoGallery'; 
+import photosData from '../data/photos.json';
+---
+
+<Layout title="Photography | My Portfolio">
+  <Navbar />
+  <main class="max-w-6xl mx-auto py-24 px-6">
+    <div class="mb-16">
+      <h1 class="text-6xl font-black tracking-tighter uppercase italic text-white">
+        Captured Interests
+      </h1>
+      <p class="text-white/40 mt-4 text-lg">A visual log of my photography and inspirations.</p>
+    </div>
+
+    {/* Pass JSON data to the React component with hydration */}
+    <PhotoGallery client:load photos={photosData} />
+
+    {photosData.length === 0 && (
+      <div class="py-20 text-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
+        <p class="text-white">Your photo collection is currently empty.</p>
+      </div>
+    )}
+  </main>
+</Layout>
