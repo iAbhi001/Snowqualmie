@@ -1,0 +1,55 @@
+---
+import { Radio, ExternalLink, Zap } from 'lucide-react';
+
+// Get your FREE key at open-platform.theguardian.com
+const GUARDIAN_API_KEY = process.env.PUBLIC_GUARDIAN_API_KEY; 
+
+// We query Business and Technology sections for a Market-focused feed
+const url = `https://content.guardianapis.com/search?section=business|technology&show-fields=trailText,thumbnail&page-size=4&api-key=${GUARDIAN_API_KEY}`;
+
+let news = [];
+try {
+  const response = await fetch(url);
+  const data = await response.json();
+  news = data.response.results;
+} catch (e) {
+  console.error("Guardian API Offline");
+}
+---
+
+<div class="mt-24 w-full max-w-5xl mx-auto">
+  <div class="flex items-center justify-end gap-3 mb-12 px-6">
+    <div class="h-[1px] w-24 bg-gradient-to-l from-blue-500 to-transparent"></div>
+    <span class="text-[10px] font-mono uppercase tracking-[0.5em] text-blue-500 flex items-center gap-2">
+      <Radio size={12} class="animate-pulse" /> Global_Signal_Intelligence
+    </span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+    {news.map((item) => (
+      <a href={item.webUrl} target="_blank" class="group relative p-8 rounded-[2.5rem] border border-white/[0.05] bg-[#050a14]/40 backdrop-blur-2xl hover:bg-[#0a1120]/80 transition-all duration-500 overflow-hidden text-left">
+        
+        <div class="flex justify-between items-start mb-6">
+          <span class="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[8px] font-mono text-blue-400 uppercase tracking-widest">
+            {item.sectionName}
+          </span>
+          <ExternalLink size={14} class="text-white/10 group-hover:text-blue-500 transition-colors" />
+        </div>
+
+        <h4 class="text-xl font-black italic text-white leading-tight tracking-tighter uppercase group-hover:text-blue-400 transition-colors mb-4 line-clamp-2">
+          {item.webTitle}
+        </h4>
+        
+        <p class="text-white/20 font-mono text-[10px] leading-relaxed line-clamp-2 uppercase">
+          {item.fields?.trailText?.replace(/<[^>]*>?/gm, '')}
+        </p>
+
+        <div class="mt-6 flex items-center gap-2 text-[8px] font-mono text-blue-500/40 uppercase tracking-widest">
+          <Zap size={10} /> {new Date(item.webPublicationDate).toLocaleTimeString()} UTC
+        </div>
+
+        <div class="absolute inset-0 pointer-events-none border border-white/[0.02] rounded-[2rem]"></div>
+      </a>
+    ))}
+  </div>
+</div>

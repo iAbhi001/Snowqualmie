@@ -1,16 +1,164 @@
 ---
-import Layout from '../layouts/Layout.astro'; // Or whatever your main layout is
+import Layout from '../layouts/Layout.astro';
 import SearchableMarketTracker from '../components/SearchableMarketTracker';
+import EarthCanvas from '../components/EarthCanvas';
+import { Radio, ExternalLink, Zap, Activity, Clock, AlertTriangle } from 'lucide-react';
+
+// 1. SSR & CACHE CONTROL
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=600');
+
+// 2. BULLETPROOF ENVIRONMENT RETRIEVAL
+// Checks Astro Meta, Node Process, and provides a direct fallback for reliability
+const GUARDIAN_KEY = 
+  import.meta.env.PUBLIC_GUARDIAN_API_KEY || 
+  process.env.PUBLIC_GUARDIAN_API_KEY || 
+  process.env.GUARDIAN_API_KEY || 
+  '1c8cf1e5-1e6f-4c3a-9bd0-9aa13ba142d4'; 
+
+const newsUrl = `https://content.guardianapis.com/search?section=business|technology&show-fields=trailText&page-size=10&api-key=${GUARDIAN_KEY}`;
+
+let news = [];
+let fetchError = false;
+
+try {
+  const response = await fetch(newsUrl);
+  const data = await response.json();
+  news = data.response?.results || [];
+} catch (e) {
+  console.error("News Uplink Offline:", e);
+  fetchError = true;
+}
+
+// 3. TIMEZONE SYNCHRONIZATION (EASTERN TIME)
+const lastSync = new Date().toLocaleTimeString('en-US', { 
+  hour: '2-digit', 
+  minute: '2-digit', 
+  second: '2-digit',
+  timeZone: 'America/New_York' 
+});
 ---
 
 <Layout title="Market Trends">
-  <main class="min-h-screen bg-[#050505] py-20 px-4">
-    <div class="max-w-4xl mx-auto">
-      <h1 class="text-white text-6xl font-black uppercase italic mb-12 text-center">
-        Market <span class="text-blue-500">Trends</span>
-      </h1>
+  <div class="fixed inset-0 z-0 bg-[#050810]">
+    <div class="absolute inset-0 z-10 bg-[url('/noise.svg')] opacity-[0.05] mix-blend-overlay pointer-events-none"></div>
+    <EarthCanvas client:only="react" />
+    <div class="absolute inset-0 z-20 bg-gradient-to-b from-[#050810]/20 via-transparent to-[#050810]"></div>
+  </div>
+
+  <main class="relative z-30 w-full min-h-screen pt-32 pb-40 px-[6vw] overflow-visible">
+    <div class="max-w-[1700px] mx-auto">
       
-      <SearchableMarketTracker client:only="react" />
+      <div class="flex justify-between items-end mb-16 border-b border-white/10 pb-8 backdrop-blur-sm">
+        <div class="text-left">
+           <a href="https://www.theguardian.com" target="_blank" class="flex flex-col items-start gap-1 group">
+            <span class="text-[9px] font-mono uppercase tracking-[0.3em] text-blue-400 font-black">Data Provided By</span>
+            <span class="text-2xl font-serif font-bold text-white tracking-tight group-hover:text-blue-400 transition-colors italic">The Guardian</span>
+          </a>
+        </div>
+
+        <div class="text-right">
+          <div class="flex items-center justify-end gap-2 text-blue-500 font-mono font-bold uppercase tracking-[0.4em] text-[10px] mb-2 text-glow">
+            <Activity size={12} class="animate-pulse" /> 
+            <span>Terminal_Uplink: Live</span>
+          </div>
+          <h1 class="text-white text-5xl font-black uppercase italic tracking-tighter leading-none drop-shadow-2xl">
+            Market <span class="text-blue-500">Trends</span>
+          </h1>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_450px] gap-16 items-start">
+        
+        <div class="w-full lg:sticky lg:top-32 rounded-[2.5rem] bg-white/[0.05] backdrop-blur-3xl border border-white/20 p-1 shadow-2xl overflow-hidden">
+          <SearchableMarketTracker client:only="react" />
+          
+          <div class="m-4 p-6 rounded-[2rem] bg-blue-500/[0.05] border border-blue-500/20 backdrop-blur-md">
+            <div class="flex items-center gap-3 text-blue-400 mb-3">
+              <Clock size={14} />
+              <span class="text-[10px] font-mono font-black uppercase tracking-widest">Compliance Protocol</span>
+            </div>
+            <p class="text-[12px] text-white/50 font-mono leading-relaxed uppercase tracking-tight">
+              Hourly sync active. Content expires in &lt; 24h. 
+              Last fetch: <span class="text-white font-bold">{lastSync} ET</span>.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex flex-col">
+          <div class="flex items-center justify-between mb-8 px-4">
+            <div class="flex items-center gap-3">
+              <Radio size={14} class="animate-pulse text-blue-500" />
+              <span class="text-[12px] font-mono uppercase tracking-[0.5em] text-blue-500 font-black">Intelligence Feed</span>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            {fetchError && (
+              <div class="p-6 rounded-2xl border border-red-500/20 bg-red-500/5 text-red-400 font-mono text-[10px] uppercase tracking-widest leading-relaxed shadow-xl">
+                <AlertTriangle size={16} class="mb-3 text-red-500" />
+                SYSTEM_ERROR: Data uplink offline. Re-establishing connection...
+              </div>
+            )}
+
+            {news.map((item) => (
+              <a href={item.webUrl} target="_blank" class="group relative p-6 rounded-[1.8rem] border border-white/10 bg-white/[0.03] backdrop-blur-xl transition-all duration-500 hover:bg-white/[0.08] hover:border-blue-500/40 text-left block shadow-xl">
+                <div class="flex justify-between items-start mb-4">
+                  <span class="px-2 py-1 rounded-md bg-blue-500/10 border border-blue-500/30 text-[8px] font-mono text-blue-400 uppercase tracking-widest font-black italic">
+                    {item.sectionName}
+                  </span>
+                  <ExternalLink size={14} class="text-white/20 group-hover:text-blue-500 transition-colors" />
+                </div>
+                
+                <h4 class="text-[15px] font-bold italic text-white leading-tight uppercase group-hover:text-blue-400 transition-colors mb-4 line-clamp-2">
+                  {item.webTitle}
+                </h4>
+                
+                <div class="flex items-center gap-2 text-[10px] font-mono text-blue-400 uppercase tracking-widest font-black">
+                  <Zap size={10} fill="currentColor" class="text-blue-500" /> 
+                  {new Date(item.webPublicationDate).toLocaleTimeString('en-US', {
+                    hour: '2-digit', 
+                    minute:'2-digit',
+                    timeZone: 'America/New_York'
+                  })} ET
+                </div>
+              </a>
+            ))}
+
+            {news.length === 0 && !fetchError && (
+              <div class="py-20 text-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
+                <p class="text-white font-mono text-xs uppercase tracking-widest animate-pulse italic">Scanning for signals...</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>
   </main>
 </Layout>
+
+<style is:global>
+  /* UNLOCK SCROLL & THEME RESET */
+  html, body {
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh;
+    background: #050810;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent Earth from stealing mouse scroll focus */
+  canvas { pointer-events: none !important; }
+
+  .text-glow {
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { 
+    background: rgba(59, 130, 246, 0.4); 
+    border-radius: 10px; 
+  }
+</style>
