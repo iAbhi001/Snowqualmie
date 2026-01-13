@@ -3,6 +3,8 @@ import Layout from '../layouts/Layout.astro';
 import EarthCanvas from '../components/EarthCanvas.tsx';
 import LeetCodeCard from '../components/LeetCodeCard.tsx';
 import ProjectGrid from '../components/ProjectGrid.tsx';
+import Navbar from '../components/Navbar.astro';
+import { FileText, Download, Eye, Activity } from 'lucide-react';
 ---
 
 <Layout title="Abhiram | Portfolio">
@@ -10,73 +12,103 @@ import ProjectGrid from '../components/ProjectGrid.tsx';
     <EarthCanvas client:only="react" />
   </div>
 
-  <main class="relative z-10 w-full overflow-y-visible">
+  <Navbar />
+
+  <main class="relative z-10 w-full">
     
-    <section id="home" class="h-screen w-full flex items-center justify-end px-24">
-      <div class="text-right animate-fade-in">
-        <h1 class="text-9xl md:text-[12rem] font-black tracking-tighter text-white drop-shadow-2xl leading-[0.8] uppercase">
+    <section id="home" class="h-screen w-full flex items-center justify-end px-[5vw] py-20">
+      <div class="text-right animate-fade-in w-full max-w-7xl">
+        <h1 class="text-[clamp(4rem,15vw,12rem)] font-black tracking-tighter text-white leading-[0.8] uppercase">
           ABHI<br/>
           <span class="text-blue-500 italic">ram</span>
         </h1>
-        <p class="text-gray-500 tracking-[0.6em] text-xs mt-8 uppercase font-light">
-          Purdue University Fort Wayne
-        </p>
-        <p class="text-blue-400/40 tracking-[0.4em] text-[10px] mt-2 uppercase font-mono italic">
-          M.S.
-        </p>
+        
+        <div class="mt-8 border-t border-white/10 pt-8 inline-block">
+          <p class="text-[clamp(1.5rem,4vw,2.5rem)] text-white font-bold tracking-tight uppercase">
+            Purdue University
+          </p>
+          <p class="text-white/40 text-[clamp(0.8rem,1.5vw,1.2rem)] font-mono tracking-[0.2em] uppercase mt-2">
+            M.S. Student in <span class="text-blue-400/80 italic">Computer Science</span>
+          </p>
+        </div>
       </div>
     </section>
 
-    <section id="leetcode" class="min-h-screen w-full flex items-center justify-center px-8 bg-black/40 backdrop-blur-sm py-20">
+    <section id="leetcode" class="min-h-screen w-full flex items-center justify-center px-[5vw] bg-black/20 backdrop-blur-sm py-32">
       <div class="max-w-6xl w-full">
-        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-xs uppercase mb-12">
+        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-xs uppercase mb-16">
           Technical Prowess
         </h2>
         <LeetCodeCard client:load /> 
       </div>
     </section>
 
-    <section id="builds" class="min-h-screen w-full py-32 px-8 bg-transparent">
-      <div class="max-w-6xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-          <div class="max-w-xl">
-            <h3 class="font-mono text-blue-500 uppercase tracking-widest mb-4">Open Source Contributions</h3>
-            <p class="text-white/40 text-sm font-medium leading-relaxed">
-              Real-time extraction of repository metadata via GitHub REST API. 
-              Focusing on high-performance financial tools and algorithmic solutions.
+    <section id="builds" class="min-h-screen w-full py-32 px-[5vw]">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-12">
+          <div class="max-w-xl text-left">
+            <h3 class="font-mono text-blue-500 uppercase tracking-widest mb-6 text-xs">Mission History</h3>
+            <p class="text-white/40 text-sm md:text-base font-medium leading-relaxed uppercase tracking-wider">
+              Systematic development of high-performance financial tools. 
             </p>
           </div>
-          <h2 class="text-7xl lg:text-8xl font-black italic uppercase tracking-tighter text-white">
+          <h2 class="text-[clamp(3.5rem,10vw,7rem)] font-black italic uppercase tracking-tighter text-white leading-none">
             Key <span class="text-blue-500">Builds</span>
           </h2>
         </div>
-        
         <ProjectGrid client:load />
       </div>
     </section>
 
+    <section id="resume" class="min-h-screen w-full py-32 px-[5vw] bg-black/40 backdrop-blur-md">
+      <div class="max-w-6xl mx-auto text-center">
+        <div class="mb-24">
+          <h3 class="font-mono text-blue-500 uppercase tracking-[0.5em] mb-6 text-xs flex items-center justify-center gap-2">
+            <Activity size={14} class="animate-pulse" /> Official Documentation
+          </h3>
+          <h2 class="text-[clamp(3.5rem,10vw,7rem)] font-black italic uppercase tracking-tighter text-white leading-none">
+            Mission <span class="text-blue-500">Briefing</span>
+          </h2>
+        </div>
+
+        <div class="relative group max-w-3xl mx-auto rounded-[3rem] border border-white/10 bg-white/5 p-12 backdrop-blur-2xl transition-all hover:border-blue-500/30 overflow-hidden">
+          <div class="flex flex-col items-center gap-12 relative z-10">
+            <div class="h-24 w-24 rounded-3xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-all duration-500">
+              <FileText size={48} className="text-blue-500" />
+            </div>
+            <div class="space-y-4">
+              <h4 class="text-2xl md:text-4xl font-bold text-white uppercase tracking-tight">Abhiram_Resume.pdf</h4>
+              <p class="text-white/40 font-mono text-[clamp(0.7rem,1.5vw,0.9rem)] uppercase tracking-[0.2em]">
+                M.S. Computer Science • Purdue • Jan 2026
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center gap-6 w-full max-w-md">
+              <a href="/resume.pdf" class="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-2xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]">
+                <Eye size={18} /> View
+              </a>
+              <a href="/resume.pdf" download class="flex-1 flex items-center justify-center gap-3 px-8 py-5 border border-white/10 hover:border-white/40 text-white font-bold uppercase tracking-widest rounded-2xl transition-all">
+                <Download size={18} /> Download
+              </a>
+            </div>
+          </div>
+          <div class="absolute -z-10 -bottom-24 -right-24 h-80 w-80 bg-blue-500/10 blur-[120px] rounded-full"></div>
+        </div>
+      </div>
+    </section>
   </main>
 </Layout>
 
 <style>
-  /* Global page resets to handle scrolling and background */
-  :global(body) {
+  /* ENFORCE SCROLLING */
+  :global(html) {
+    scroll-behavior: smooth;
     overflow-y: auto !important;
     height: auto !important;
+  }
+  :global(body) {
     background-color: #030303;
     margin: 0;
-  }
-
-  html {
-    scroll-behavior: smooth;
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 2s ease-out forwards;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateX(50px); }
-    to { opacity: 1; transform: translateX(0); }
+    overflow-x: hidden;
+    min-height: 100vh;
   }
 </style>

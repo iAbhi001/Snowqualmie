@@ -1,32 +1,76 @@
 @import "tailwindcss";
 
+/* 1. GLOBAL FLUID VARIABLES */
+:root {
+  /* Scales the 'Hello' font from 5rem on mobile to 15rem on desktop */
+  --fluid-hello: clamp(5rem, 18vw, 15rem);
+  /* Scales the big costs/headers */
+  --fluid-hero: clamp(4rem, 22vw, 20rem);
+}
+
 @layer components {
+  /* 2. RESPONSIVE GLASS CARD */
   .glass-card {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 2rem;
-    padding: 1.5rem;
+    /* Use clamp for padding to save space on mobile */
+    padding: clamp(1rem, 3vw, 2.5rem); 
+    border-radius: clamp(1.5rem, 4vw, 3rem);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%; /* Ensure cards never overflow their container */
   }
 }
 
+/* 3. BASE STYLES */
 body {
   background-color: black;
   color: white;
   margin: 0;
   -webkit-font-smoothing: antialiased;
+  /* Prevent horizontal scrolling globally */
+  overflow-x: hidden; 
+  width: 100%;
 }
 
-
-/* Import from Google Fonts */
+/* 4. FLUID HERO FONT */
 @import url('https://fonts.googleapis.com/css2?family=Birthstone+Bounce:wght@400;500&display=swap');
 
 .hello-font {
   font-family: 'Birthstone Bounce', cursive;
-  font-size: 15rem; /* Large and bold for the 'Data Pilot' hero text */
+  /* Swapped fixed 15rem for fluid variable */
+  font-size: var(--fluid-hello); 
   color: white;
-  text-shadow: 0 0 40px rgba(59, 130, 246, 0.5); /* Adds that 'Apple' glow */
+  text-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
   line-height: 1;
+  /* Ensure the script font doesn't clip on small screens */
+  overflow: visible; 
+  display: block;
+}
+
+/* 5. UTILITY: Responsive Content Wrapper */
+.content-wrapper {
+  width: 100%;
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 5vw;
+  padding-right: 5vw;
+}
+
+/* src/styles/global.css */
+
+:global(html) {
+  scroll-behavior: smooth; /* */
+  overflow-y: auto !important; /* Forces vertical scroll */
+  height: auto !important; /* Allows the page to grow with content */
+}
+
+:global(body) {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh; /* Ensures body is at least as tall as the screen */
+  background-color: #030303;
+  overflow-x: hidden; /* Prevents horizontal jank */
 }

@@ -1,10 +1,90 @@
-<div class="glass-card w-64">
-  <p class="text-[10px] uppercase tracking-[0.2em] text-blue-500 font-bold mb-2">AWS Infrastructure Cost</p>
-  <div class="flex items-baseline gap-1">
-    <span class="text-3xl font-light">$0.00</span>
-    <span class="text-xs text-gray-500">/mo (S3 + CDN)</span>
+---
+import { 
+  Activity, 
+  Globe, 
+  Zap, 
+  ArrowDownCircle, 
+  AlertCircle, 
+  Cpu 
+} from 'lucide-react';
+
+const metrics = [
+  { title: 'Edge Requests', value: '2.4k', sub: 'Last 24 Hours', icon: Globe, color: 'text-blue-500', tag: 'CloudFront' },
+  { title: 'Network Egress', value: '842MB', sub: 'Data Transferred', icon: ArrowDownCircle, color: 'text-green-500', tag: 'S3_Origin' },
+  { title: 'Avg Latency', value: '14ms', sub: 'Global TTL', icon: Zap, color: 'text-purple-500', tag: 'Edge_Node' },
+  { title: 'Error Rate', value: '0.01%', sub: 'Healthy State', icon: AlertCircle, color: 'text-orange-500', tag: 'Healthy' }
+];
+---
+
+<section id="infrastructure" class="relative w-full flex flex-col items-center justify-start group">
+  
+  <div class="w-full max-w-[1400px] relative z-10 text-right">
+    
+    <div class="mb-10 flex flex-col items-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity duration-700">
+      <div class="flex items-center gap-2 text-blue-500 font-mono font-bold uppercase tracking-[0.4em] text-[10px]">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+        </span>
+        <span>AWS_LIVE_TELEMETRY: ACTIVE</span>
+      </div>
+      <p class="text-white/40 font-mono uppercase tracking-[0.2em] text-[9px]">Node Path: US-EAST-1 (N. Virginia)</p>
+    </div>
+
+    <div class="relative inline-block mb-16 group/cost">
+      <div class="flex items-center justify-end relative">
+        <h1 class="text-[clamp(6rem,22vw,16rem)] font-black italic tracking-tighter text-white leading-none drop-shadow-[0_0_80px_rgba(59,130,246,0.15)] group-hover/cost:text-blue-500 transition-all duration-700">
+          $0<span class="text-blue-500 group-hover/cost:text-white transition-colors">.00</span>
+        </h1>
+        
+        <div class="flex flex-col items-start text-left border-l-[4px] border-blue-500 pl-8 ml-8 h-fit">
+          <span class="text-[clamp(2.5rem,8vw,5.5rem)] font-black italic text-white uppercase tracking-tighter leading-[0.8]">
+            USD
+          </span>
+          <span class="text-[clamp(0.6rem,1.2vw,0.85rem)] font-mono text-blue-400/60 uppercase tracking-[0.5em] mt-4 font-black whitespace-nowrap">
+            Monthly_Burn
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col items-end w-full mb-32">
+      <h2 class="text-[clamp(2.5rem,7vw,5.5rem)] font-black uppercase tracking-tight text-white leading-none">
+        Cloud <span class="text-blue-500 italic">Expenditure</span>
+      </h2>
+      <p class="text-white/20 font-mono tracking-[0.6em] uppercase italic mt-6">
+        Architected by <span class="text-blue-400 font-black not-italic hover:text-white transition-colors">ABHIRAM</span>
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {metrics.map((m) => (
+        <div class="group relative p-10 rounded-[2.5rem] border border-white/[0.05] bg-[#050a14]/60 backdrop-blur-xl transition-all duration-500 hover:bg-[#0a1120]/80 hover:border-white/10 text-left overflow-hidden shadow-2xl">
+          <div class="flex justify-between items-start mb-16">
+            <div class="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 group-hover:scale-110 transition-transform duration-500">
+              <m.icon size={22} class={m.color} />
+            </div>
+            <Cpu size={14} class="text-white/5 group-hover:text-white/20 transition-colors" />
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-[2.2rem] font-black italic text-white uppercase tracking-tighter leading-none group-hover:text-blue-400 transition-colors">
+              {m.value}
+            </h3>
+            <p class="text-[10px] font-mono text-white/20 uppercase tracking-[0.2em] group-hover:text-white/40 transition-colors">
+              {m.sub}
+            </p>
+          </div>
+
+          <div class="mt-8 flex justify-between items-center">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-blue-500/5 border border-blue-500/10 text-[9px] font-mono font-bold text-blue-400/60 uppercase tracking-widest group-hover:border-blue-500/40">
+              {m.tag}
+            </span>
+            <span class="text-[9px] font-mono text-white/5 uppercase tracking-widest transition-opacity duration-500 group-hover:opacity-100 opacity-0">{m.title}</span>
+          </div>
+          <div class="absolute inset-0 pointer-events-none border border-white/[0.02] rounded-[2.5rem]"></div>
+        </div>
+      ))}
+    </div>
   </div>
-  <div class="mt-4 h-1 w-full bg-white/5 rounded-full overflow-hidden">
-    <div class="h-full w-[2%] bg-blue-500"></div>
-  </div>
-</div>
+</section>
