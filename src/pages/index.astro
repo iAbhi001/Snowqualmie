@@ -1,40 +1,72 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import EarthCanvas from '../components/EarthCanvas.tsx';
+import SearchableMarketTracker from '../components/SearchableMarketTracker.tsx';
+import LeetCodeCard from '../components/LeetCodeCard.tsx'; //
+import { Trophy, BarChart3 } from 'lucide-react';
 ---
 
-<Layout title="Data Pilot | Command">
-  <EarthCanvas client:only="react" />
+<Layout title="Abhiram | Portfolio">
+  <div class="fixed inset-0 z-0">
+    <EarthCanvas client:only="react" />
+  </div>
 
-  <main class="relative h-screen w-full flex items-center justify-end px-24 overflow-hidden">
-    <div class="z-10 text-right animate-fade-in">
-      <h1 class="text-9xl md:text-[12rem] font-black tracking-tighter text-white drop-shadow-2xl leading-[0.8] uppercase">
-        ABHI<br/>
-        <span class="text-blue-500 italic">ram</span>
-      </h1>
-      <p class="text-gray-500 tracking-[0.6em] text-xs mt-8 uppercase font-light">
-        Purdue University Fort Wayne
-      </p>
-      <p class="text-blue-400/40 tracking-[0.4em] text-[10px] mt-2 uppercase font-mono italic">
-        M.S.
-      </p>
-    </div>
+  <main class="relative z-10 w-full overflow-y-visible">
+    
+    <section id="home" class="h-screen w-full flex items-center justify-end px-24">
+      <div class="text-right animate-fade-in">
+        <h1 class="text-9xl md:text-[12rem] font-black tracking-tighter text-white drop-shadow-2xl leading-[0.8] uppercase">
+          ABHI<br/>
+          <span class="text-blue-500 italic">ram</span>
+        </h1>
+        <p class="text-gray-500 tracking-[0.6em] text-xs mt-8 uppercase font-light">
+          Purdue University Fort Wayne
+        </p>
+        <p class="text-blue-400/40 tracking-[0.4em] text-[10px] mt-2 uppercase font-mono italic">
+          M.S.
+        </p>
+      </div>
+    </section>
+
+    <section id="leetcode" class="min-h-screen w-full flex items-center justify-center px-8 bg-black/40 backdrop-blur-sm py-20">
+      <div class="max-w-4xl w-full">
+        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-xs uppercase mb-12">
+          Technical Prowess
+        </h2>
+        <LeetCodeCard client:load /> 
+      </div>
+    </section>
+
+    <section id="trends" class="min-h-screen w-full py-32 px-8 bg-[#030303]">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-6xl font-black italic uppercase tracking-tighter text-white mb-20 text-right">
+          Key <span class="text-blue-500">Builds</span>
+        </h2>
+        <SearchableMarketTracker client:load />
+      </div>
+    </section>
+
   </main>
 </Layout>
 
 <style>
+  /* Force the body to be scrollable */
+  :global(body) {
+    overflow-y: auto !important;
+    height: auto !important;
+    background-color: #030303;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   .animate-fade-in {
     animation: fadeIn 2s ease-out forwards;
   }
 
   @keyframes fadeIn {
-    from { 
-      opacity: 0; 
-      transform: translateX(50px); 
-    }
-    to { 
-      opacity: 1; 
-      transform: translateX(0); 
-    }
+    from { opacity: 0; transform: translateX(50px); }
+    to { opacity: 1; transform: translateX(0); }
   }
 </style>
