@@ -1,9 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import EarthCanvas from '../components/EarthCanvas.tsx';
-import SearchableMarketTracker from '../components/SearchableMarketTracker.tsx';
-import LeetCodeCard from '../components/LeetCodeCard.tsx'; //
-import { Trophy, BarChart3 } from 'lucide-react';
+import LeetCodeCard from '../components/LeetCodeCard.tsx';
+import ProjectGrid from '../components/ProjectGrid.tsx';
 ---
 
 <Layout title="Abhiram | Portfolio">
@@ -29,7 +28,7 @@ import { Trophy, BarChart3 } from 'lucide-react';
     </section>
 
     <section id="leetcode" class="min-h-screen w-full flex items-center justify-center px-8 bg-black/40 backdrop-blur-sm py-20">
-      <div class="max-w-4xl w-full">
+      <div class="max-w-6xl w-full">
         <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-xs uppercase mb-12">
           Technical Prowess
         </h2>
@@ -37,12 +36,22 @@ import { Trophy, BarChart3 } from 'lucide-react';
       </div>
     </section>
 
-    <section id="trends" class="min-h-screen w-full py-32 px-8 bg-[#030303]">
+    <section id="builds" class="min-h-screen w-full py-32 px-8 bg-transparent">
       <div class="max-w-6xl mx-auto">
-        <h2 class="text-6xl font-black italic uppercase tracking-tighter text-white mb-20 text-right">
-          Key <span class="text-blue-500">Builds</span>
-        </h2>
-        <SearchableMarketTracker client:load />
+        <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+          <div class="max-w-xl">
+            <h3 class="font-mono text-blue-500 uppercase tracking-widest mb-4">Open Source Contributions</h3>
+            <p class="text-white/40 text-sm font-medium leading-relaxed">
+              Real-time extraction of repository metadata via GitHub REST API. 
+              Focusing on high-performance financial tools and algorithmic solutions.
+            </p>
+          </div>
+          <h2 class="text-7xl lg:text-8xl font-black italic uppercase tracking-tighter text-white">
+            Key <span class="text-blue-500">Builds</span>
+          </h2>
+        </div>
+        
+        <ProjectGrid client:load />
       </div>
     </section>
 
@@ -50,11 +59,12 @@ import { Trophy, BarChart3 } from 'lucide-react';
 </Layout>
 
 <style>
-  /* Force the body to be scrollable */
+  /* Global page resets to handle scrolling and background */
   :global(body) {
     overflow-y: auto !important;
     height: auto !important;
     background-color: #030303;
+    margin: 0;
   }
 
   html {

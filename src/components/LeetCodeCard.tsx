@@ -5,7 +5,6 @@ export default function LeetCodeCard() {
   const [stats, setStats] = useState({ total: 617, easy: 0, medium: 0 });
   const [isSyncing, setIsSyncing] = useState(false);
 
-  // Replace with your actual LeetCode username
   const leetcodeUrl = "https://leetcode.com/u/mmulpuri/";
 
   const fetchStats = async () => {
@@ -33,10 +32,14 @@ export default function LeetCodeCard() {
   }, []);
 
   return (
-    /* Increased border visibility and transparency */
-    <div className="relative group overflow-hidden rounded-[3rem] border border-white/20 bg-transparent p-16 backdrop-blur-sm transition-all hover:border-blue-500/40">
+    /* Key Changes: 
+       1. Changed bg-white/5 to bg-transparent for full transparency.
+       2. Kept backdrop-blur-sm to ensure text remains readable over the Earth.
+       3. Increased border opacity (border-white/20) so the card shape is visible.
+    */
+    <div className="relative group overflow-hidden rounded-[3rem] border border-white/20 bg-transparent p-16 backdrop-blur-sm transition-all hover:border-blue-500/40 z-10">
       
-      {/* Dynamic Background Glow */}
+      {/* Subtle Dynamic Background Glow - lowered opacity to keep it translucent */}
       <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-blue-500/5 blur-[150px] transition-all group-hover:bg-blue-500/10"></div>
 
       <div className="mb-16 flex items-start justify-between">
@@ -62,7 +65,6 @@ export default function LeetCodeCard() {
         </a>
       </div>
 
-      {/* MEGA SIZE CONTENT AREA */}
       <div className="relative flex items-center gap-12">
         <span className="text-[16rem] font-black italic leading-none tracking-tighter text-white drop-shadow-[0_0_60px_rgba(59,130,246,0.25)]">
           {stats.total}
@@ -78,7 +80,6 @@ export default function LeetCodeCard() {
         </div>
       </div>
 
-      {/* STAT BREAKDOWN */}
       <div className="mt-24 grid grid-cols-3 gap-12 border-t border-white/10 pt-12">
         <div className="flex flex-col">
           <span className="font-mono text-4xl font-bold text-green-400">{stats.easy}</span>
