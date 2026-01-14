@@ -4,7 +4,7 @@ import SearchableMarketTracker from '../components/SearchableMarketTracker';
 import { Radio, ExternalLink, Zap, Activity } from 'lucide-react';
 
 // --- SERVER-SIDE NEWS FETCH ---
-const GUARDIAN_KEY = process.env.PUBLIC_GUARDIAN_API_KEY; 
+const GUARDIAN_KEY = process.env.GUARDIAN_API_KEY; 
 const newsUrl = `https://content.guardianapis.com/search?section=business|technology&show-fields=trailText&page-size=6&api-key=${GUARDIAN_KEY}`;
 
 let news = [];

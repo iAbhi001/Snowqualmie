@@ -16,11 +16,10 @@ import {
 
 export const prerender = false;
 
+// Secure Environment Retrieval
 const GUARDIAN_KEY = 
   import.meta.env.GUARDIAN_API_KEY || 
-  process.env.GUARDIAN_API_KEY ||
-  import.meta.env.PUBLIC_GUARDIAN_API_KEY ||
-  process.env.PUBLIC_GUARDIAN_API_KEY;
+  process.env.GUARDIAN_API_KEY;
 
 const newsUrl = `https://content.guardianapis.com/search?section=business|technology&show-fields=trailText&page-size=10&api-key=${GUARDIAN_KEY}`;
 
@@ -52,31 +51,34 @@ const lastSync = new Date().toLocaleTimeString('en-US', {
     
     <EarthCanvas client:only="react" />
     
-    <div class="absolute inset-0 z-20 bg-gradient-to-b from-transparent via-transparent to-[#050810]/40 pointer-events-none"></div>
+    <div class="absolute inset-0 z-20 bg-gradient-to-b from-transparent via-transparent to-[#050810]/60 pointer-events-none"></div>
   </div>
 
-  <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center group pointer-events-none">
-    <div class="mb-3 px-3 py-1 bg-blue-500/20 backdrop-blur-xl border border-blue-400/30 rounded-full flex items-center gap-2">
-      <div class="relative flex h-2 w-2">
+  <div class="fixed bottom-[env(safe-area-inset-bottom,2.5rem)] left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center group pointer-events-none w-[90vw] max-w-[420px]">
+    
+    <div class="mb-3 px-3 py-1 bg-blue-500/20 backdrop-blur-xl border border-blue-400/30 rounded-full flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+      <div class="relative flex h-1.5 w-1.5">
         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-400 shadow-[0_0_10px_#60a5fa]"></span>
+        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-400 shadow-[0_0_8px_#60a5fa]"></span>
       </div>
-      <span class="font-mono text-[9px] font-black uppercase tracking-[0.4em] text-blue-300">
+      <span class="font-mono text-[8px] md:text-[9px] font-black uppercase tracking-[0.4em] text-blue-300">
         Live_Signal_Uplink
       </span>
     </div>
 
-    <div class="px-10 py-6 bg-white/[0.05] backdrop-blur-[40px] border border-white/20 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] flex items-center gap-10">
+    <div class="w-full px-8 py-5 md:px-10 md:py-6 bg-white/[0.08] backdrop-blur-[45px] border border-white/20 rounded-[2.5rem] md:rounded-[3.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-around md:justify-center md:gap-10">
       <div class="flex flex-col items-center">
-        <span class="text-[10px] font-mono text-white/40 uppercase tracking-[0.3em] mb-1">Latitude</span>
-        <span id="island-lat" class="text-2xl md:text-3xl font-black font-mono text-white tracking-tighter tabular-nums text-glow">
+        <span class="text-[9px] md:text-[10px] font-mono text-white/40 uppercase tracking-[0.3em] mb-0.5">Latitude</span>
+        <span id="island-lat" class="text-[clamp(1.2rem,5vw,2rem)] font-black font-mono text-white tracking-tighter tabular-nums text-glow">
           --.----°
         </span>
       </div>
+
       <div class="h-10 w-[1px] bg-white/20"></div>
+
       <div class="flex flex-col items-center">
-        <span class="text-[10px] font-mono text-white/40 uppercase tracking-[0.3em] mb-1">Longitude</span>
-        <span id="island-lng" class="text-2xl md:text-3xl font-black font-mono text-white tracking-tighter tabular-nums text-glow">
+        <span class="text-[9px] md:text-[10px] font-mono text-white/40 uppercase tracking-[0.3em] mb-0.5">Longitude</span>
+        <span id="island-lng" class="text-[clamp(1.2rem,5vw,2rem)] font-black font-mono text-white tracking-tighter tabular-nums text-glow">
           --.----°
         </span>
       </div>
@@ -113,7 +115,7 @@ const lastSync = new Date().toLocaleTimeString('en-US', {
       </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-[1fr_450px] gap-16 items-start">
-        <div class="w-full lg:sticky lg:top-32 rounded-[3rem] bg-white/[0.04] backdrop-blur-[50px] border border-white/20 p-1 shadow-2xl transition-all duration-700 hover:border-blue-400/40">
+        <div class="w-full lg:sticky lg:top-32 rounded-[3rem] bg-white/[0.05] backdrop-blur-[50px] border border-white/20 p-1 shadow-2xl transition-all duration-700 hover:border-blue-400/40">
           <SearchableMarketTracker client:only="react" />
           
           <div class="m-6 p-8 rounded-[2.5rem] bg-blue-400/[0.08] border border-blue-400/20 backdrop-blur-xl">
@@ -143,7 +145,7 @@ const lastSync = new Date().toLocaleTimeString('en-US', {
             )}
 
             {news.map((item) => (
-              <a href={item.webUrl} target="_blank" class="group relative p-8 rounded-[2.5rem] border border-white/10 bg-white/[0.05] backdrop-blur-[30px] transition-all duration-500 hover:bg-white/[0.1] hover:border-blue-400/40 block">
+              <a href={item.webUrl} target="_blank" class="group relative p-8 rounded-[2.5rem] border border-white/10 bg-white/[0.06] backdrop-blur-[35px] transition-all duration-500 hover:bg-white/[0.12] hover:border-blue-400/40 block">
                 <div class="flex justify-between items-start mb-6">
                   <span class="px-3 py-1.5 rounded-xl bg-blue-500/20 border border-blue-400/30 text-[9px] font-mono text-blue-300 uppercase tracking-widest font-black italic">
                     {item.sectionName}
@@ -180,6 +182,11 @@ const lastSync = new Date().toLocaleTimeString('en-US', {
 
 <style is:global>
   .text-glow { text-shadow: 0 0 15px rgba(255, 255, 255, 0.2), 0 0 10px rgba(59, 130, 246, 0.4); }
-  html, body { background: #050810; scroll-behavior: smooth; }
+  html, body { 
+    background: #050810; 
+    scroll-behavior: smooth;
+    /* Important for iPhone 14 Pro */
+    overflow-x: hidden;
+  }
   canvas { pointer-events: none !important; }
 </style>
