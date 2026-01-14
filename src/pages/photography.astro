@@ -3,8 +3,12 @@ import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import PhotoGallery from '../components/PhotoGallery'; 
 import EarthCanvas from '../components/EarthCanvas';
-import photosData from '../data/photos.json';
+// Import the dynamic utility instead of JSON
+import { getCapturedInterests } from '../lib/aws';
 import { Activity } from 'lucide-react';
+
+// Fetch live from S3
+const photos = await getCapturedInterests();
 ---
 
 <Layout title="Photography | Captured Interests">
@@ -33,11 +37,12 @@ import { Activity } from 'lucide-react';
       </div>
 
       <div class="relative z-40 rounded-[2.5rem] bg-white/[0.05] backdrop-blur-[40px] border border-white/20 p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-all duration-700 hover:border-blue-500/30">
-        <PhotoGallery client:load photos={photosData} />
+        {/* Pass the dynamically fetched photos here */}
+        <PhotoGallery client:load photos={photos} />
 
-        {photosData.length === 0 && (
+        {photos.length === 0 && (
           <div class="py-40 text-center bg-white/[0.02] border border-dashed border-white/20 rounded-[2rem]">
-            <p class="text-white/40 font-mono uppercase tracking-widest text-sm italic">Transmission Received: No visual data found.</p>
+            <p class="text-white/40 font-mono uppercase tracking-widest text-sm italic">Transmission Received: No visual data found in S3_Sector.</p>
           </div>
         )}
       </div>
@@ -50,29 +55,3 @@ import { Activity } from 'lucide-react';
     </div>
   </main>
 </Layout>
-
-<style is:global>
-  /* UNLOCK SCROLL */
-  html, body {
-    overflow-y: auto !important;
-    height: auto !important;
-    min-height: 100vh;
-    background: #050810;
-    scroll-behavior: smooth;
-  }
-
-  canvas { pointer-events: none !important; }
-
-  /* GLOW UTILITIES */
-  .text-glow {
-    text-shadow: 0 0 15px rgba(96, 165, 250, 0.7), 0 0 30px rgba(59, 130, 246, 0.3);
-  }
-
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { 
-    background: rgba(96, 165, 250, 0.5); 
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
-  }
-</style>

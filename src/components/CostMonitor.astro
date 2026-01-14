@@ -1,32 +1,70 @@
 ---
 import { 
-  Activity, 
   Globe, 
   Zap, 
   ArrowDownCircle, 
   AlertCircle, 
   Cpu 
 } from 'lucide-react';
+import { getLiveMetrics } from '../lib/aws';
+
+// FETCH LIVE TELEMETRY
+const data = await getLiveMetrics();
+
+// Data Formatting Helpers
+const formatRequests = (val) => val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toString();
+const formatBytes = (bytes) => {
+  if (bytes === 0) return "0MB";
+  const mb = bytes / (1024 * 1024);
+  return mb >= 1024 ? `${(mb / 1024).toFixed(1)}GB` : `${Math.round(mb)}MB`;
+};
 
 const metrics = [
-  { title: 'Edge Requests', value: '2.4k', sub: 'Last 24 Hours', icon: Globe, color: 'text-blue-500', tag: 'CloudFront' },
-  { title: 'Network Egress', value: '842MB', sub: 'Data Transferred', icon: ArrowDownCircle, color: 'text-green-500', tag: 'S3_Origin' },
-  { title: 'Avg Latency', value: '14ms', sub: 'Global TTL', icon: Zap, color: 'text-purple-500', tag: 'Edge_Node' },
-  { title: 'Error Rate', value: '0.01%', sub: 'Healthy State', icon: AlertCircle, color: 'text-orange-500', tag: 'Healthy' }
+  { 
+    title: 'Edge Requests', 
+    value: data ? formatRequests(data.requests) : '---', 
+    sub: 'Last 24 Hours', 
+    icon: Globe, 
+    color: 'text-blue-500', 
+    tag: 'CloudFront' 
+  },
+  { 
+    title: 'Network Egress', 
+    value: data ? formatBytes(data.egress) : '---', 
+    sub: 'Data Transferred', 
+    icon: ArrowDownCircle, 
+    color: 'text-green-500', 
+    tag: 'S3_Origin' 
+  },
+  { 
+    title: 'Avg Latency', 
+    value: '14ms', // This is typically static unless using RUM
+    sub: 'Global TTL', 
+    icon: Zap, 
+    color: 'text-purple-500', 
+    tag: 'Edge_Node' 
+  },
+  { 
+    title: 'Error Rate', 
+    value: data ? `${((data.errors / (data.requests || 1)) * 100).toFixed(2)}%` : '0.00%', 
+    sub: 'Healthy State', 
+    icon: AlertCircle, 
+    color: 'text-orange-500', 
+    tag: data?.errors > 0 ? 'Action_Required' : 'Healthy' 
+  }
 ];
 ---
 
-<section id="infrastructure" class="relative w-full flex flex-col items-center justify-start group">
-  
+<section id="infrastructure" class="relative w-full flex flex-col items-center justify-start group py-32">
   <div class="w-full max-w-[1400px] relative z-10 text-right">
     
     <div class="mb-10 flex flex-col items-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity duration-700">
       <div class="flex items-center gap-2 text-blue-500 font-mono font-bold uppercase tracking-[0.4em] text-[10px]">
         <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          <span class:list={["absolute inline-flex h-full w-full rounded-full opacity-75", data ? "animate-ping bg-blue-400" : "bg-red-400"]}></span>
+          <span class:list={["relative inline-flex rounded-full h-2 w-2", data ? "bg-blue-500" : "bg-red-500"]}></span>
         </span>
-        <span>AWS_LIVE_TELEMETRY: ACTIVE</span>
+        <span>{data ? 'AWS_LIVE_TELEMETRY: ACTIVE' : 'UPLINK_STATUS: OFFLINE'}</span>
       </div>
       <p class="text-white/40 font-mono uppercase tracking-[0.2em] text-[9px]">Node Path: US-EAST-1 (N. Virginia)</p>
     </div>
@@ -36,33 +74,10 @@ const metrics = [
         <h1 class="text-[clamp(6rem,22vw,16rem)] font-black italic tracking-tighter text-white leading-none drop-shadow-[0_0_80px_rgba(59,130,246,0.15)] group-hover/cost:text-blue-500 transition-all duration-700">
           $0<span class="text-blue-500 group-hover/cost:text-white transition-colors">.00</span>
         </h1>
-        
         <div class="flex flex-col items-start text-left border-l-[4px] border-blue-500 pl-8 ml-8 h-fit">
-          <span class="text-[clamp(2.5rem,8vw,5.5rem)] font-black italic text-white uppercase tracking-tighter leading-[0.8]">
-            USD
-          </span>
-          <span class="text-[clamp(0.6rem,1.2vw,0.85rem)] font-mono text-blue-400/60 uppercase tracking-[0.5em] mt-4 font-black whitespace-nowrap">
-            YTD_Cumulative_Cost
-          </span>
+          <span class="text-[clamp(2.5rem,8vw,5.5rem)] font-black italic text-white uppercase tracking-tighter leading-[0.8]">USD</span>
+          <span class="text-[clamp(0.6rem,1.2vw,0.85rem)] font-mono text-blue-400/60 uppercase tracking-[0.5em] mt-4 font-black whitespace-nowrap">YTD_Cumulative_Cost</span>
         </div>
-      </div>
-    </div>
-
-    <div class="flex flex-col items-end w-full mb-32 text-right">
-      <h2 class="text-[clamp(2.5rem,7vw,5.5rem)] font-black uppercase tracking-tight text-white leading-none">
-        Fiscal <span class="text-blue-500 italic">Maintenance</span>
-      </h2>
-      <div class="max-w-2xl mt-8">
-        <p class="text-white/40 font-mono text-[clamp(0.7rem,1.5vw,0.9rem)] leading-relaxed uppercase tracking-tighter">
-          This interface documents the total Year-to-Date (YTD) cost required to maintain 
-          the global infrastructure for this platform. It serves as a transparent 
-          financial audit, showcasing the intersection of high-performance system architecture 
-          and lean economic sustainment. By surfacing these metrics, the project 
-          demonstrates the viability of zero-waste cloud engineering in a live environment.
-        </p>
-        <p class="text-blue-400/60 font-mono tracking-[0.4em] uppercase text-[10px] mt-4 font-black">
-          Report_Cycle: YTD_2026 // Logic: Sustainability_Verification
-        </p>
       </div>
     </div>
 
@@ -75,7 +90,6 @@ const metrics = [
             </div>
             <Cpu size={14} class="text-white/5 group-hover:text-white/20 transition-colors" />
           </div>
-
           <div class="space-y-2">
             <h3 class="text-[2.2rem] font-black italic text-white uppercase tracking-tighter leading-none group-hover:text-blue-400 transition-colors">
               {m.value}
@@ -84,14 +98,11 @@ const metrics = [
               {m.sub}
             </p>
           </div>
-
           <div class="mt-8 flex justify-between items-center">
             <span class="inline-block px-4 py-1.5 rounded-full bg-blue-500/5 border border-blue-500/10 text-[9px] font-mono font-bold text-blue-400/60 uppercase tracking-widest group-hover:border-blue-500/40">
               {m.tag}
             </span>
-            <span class="text-[9px] font-mono text-white/5 uppercase tracking-widest transition-opacity duration-500 group-hover:opacity-100 opacity-0">{m.title}</span>
           </div>
-          <div class="absolute inset-0 pointer-events-none border border-white/[0.02] rounded-[2.5rem]"></div>
         </div>
       ))}
     </div>

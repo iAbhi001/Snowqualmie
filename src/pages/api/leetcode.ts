@@ -1,23 +1,27 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async () => {
-  try {
-    // Using an unofficial LeetCode stats API
-    const response = await fetch('https://leetcode-stats-api.herokuapp.com/mmulpuri');
-    const data = await response.json();
+  const handle = import.meta.env.PUBLIC_LEETCODE_USER || "mmulpuri";
+  const controller = new AbortController();
+  // Fail after 8 seconds to stay under the 10s serverless limit
+  const timeoutId = setTimeout(() => controller.abort(), 8000); 
 
-    if (data.status === 'success') {
-      return new Response(JSON.stringify({
-        totalSolved: data.totalSolved,
-        easySolved: data.easySolved,
-        mediumSolved: data.mediumSolved,
-        hardSolved: data.hardSolved,
-        acceptanceRate: data.acceptanceRate
-      }), { status: 200 });
-    }
+  try {
+    const response = await fetch(`https://leetcode-stats-api.herokuapp.com/${handle}`, {
+      signal: controller.signal
+    });
     
-    return new Response(JSON.stringify({ error: 'Failed to fetch' }), { status: 500 });
-  } catch (e) {
-    return new Response(JSON.stringify({ error: 'Server error' }), { status: 500 });
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) throw new Error('External_Node_Failure');
+    
+    const data = await response.json();
+    return new Response(JSON.stringify(data), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (error) {
+    console.error("LEETCODE_API_TIMEOUT:", error);
+    return new Response(JSON.stringify({ error: "Uplink_Timeout" }), { status: 504 });
   }
-}
+};
