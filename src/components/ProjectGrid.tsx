@@ -50,7 +50,7 @@ export default function ProjectGrid() {
       {repos.map((repo) => (
         <ProjectCard 
           key={repo.id}
-          title={repo.name.replace(/-/g, ' ')} // Clean up repo-names-like-this
+          title={repo.name.replace(/-/g, ' ')} 
           description={repo.description || "No description provided."}
           tech={repo.topics.length > 0 ? repo.topics : [repo.language].filter(Boolean)}
           githubUrl={repo.html_url}

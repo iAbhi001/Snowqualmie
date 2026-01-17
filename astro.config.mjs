@@ -1,17 +1,19 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
-import awsAmplify from 'astro-aws-amplify'; 
+import awsAmplify from 'astro-aws-amplify';
+
+// Check if we are in a build environment (production)
+const isProduction = process.env.NODE_ENV === 'production' || process.env.CI === 'true';
 
 export default defineConfig({
   output: 'server',
-  adapter: awsAmplify(),
+  // Only use the Amplify adapter during a build
+  adapter: isProduction ? awsAmplify() : undefined, 
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
     ssr: {
-      // THIS IS THE KEY: It bundles 'dotenv' and 'react' directly 
-      // into the server file so the 500 error disappears.
       noExternal: true 
     }
   }
