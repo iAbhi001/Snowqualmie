@@ -103,7 +103,7 @@ export async function getCapturedInterests() {
     // Filter out the prefix itself and map to the gallery format
     return data.Contents?.filter(item => item.Key !== prefix).map((item, index) => ({
       id: index,
-      name: item.Key.replace(prefix, ""), 
+      name: item.Key?.replace(prefix, "") || "", 
       url: `https://${bucketName}.s3.amazonaws.com/${item.Key}`,
       lastModified: item.LastModified
     })) || [];

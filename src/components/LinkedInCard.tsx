@@ -41,7 +41,8 @@ export default function LinkedInCard() {
 
       <div className="mt-12 flex justify-start">
         <a 
-          href="https://linkedin.com/in/YOUR_PROFILE" 
+          href="https://linkedin.com/in/mamulpuri" 
+          
           target="_blank"
           className="flex items-center gap-4 bg-blue-600 px-10 py-5 rounded-2xl text-white font-black uppercase tracking-widest hover:bg-blue-500 transition-all active:scale-95"
         >

@@ -6,7 +6,7 @@ import ProjectGrid from '../components/ProjectGrid.tsx';
 import LinkedInCard from '../components/LinkedInCard.tsx';
 import CertificationGrid from '../components/CertificationGrid.tsx';
 import Navbar from '../components/Navbar.astro';
-import { FileText, Download, Eye, Activity, Mail, Terminal, ChevronDown, ExternalLink } from 'lucide-react';
+import { Mail, Terminal, ExternalLink } from 'lucide-react';
 
 export const prerender = false;
 ---
@@ -40,10 +40,23 @@ export const prerender = false;
       </div>
     </section>
 
+    <section class="w-full py-10 px-[5vw] flex justify-center -mt-20 mb-20">
+      <div class="flex items-center gap-6 px-8 py-4 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md transition-all hover:border-blue-500/20">
+        <div class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+        </div>
+        <p class="font-mono text-[10px] md:text-xs uppercase tracking-[0.4em] text-white/50">
+          Total Visitors: 
+          <span id="visitor-count" class="text-blue-500 font-black ml-2 text-glow">000000</span>
+        </p>
+      </div>
+    </section>
+
     <section id="leetcode" class="min-h-screen w-full flex flex-col items-center justify-center px-[5vw] bg-black/10 py-32">
       <div class="max-w-6xl w-full">
         <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
-          Technical Prowess // LeetCode_Analytics
+          Problem Solving Stats
         </h2>
         <div class="backdrop-blur-xl rounded-[3rem] border border-white/5 bg-white/[0.01]">
            <LeetCodeCard client:load /> 
@@ -55,7 +68,7 @@ export const prerender = false;
       <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-12">
           <div class="max-w-xl text-left">
-            <h3 class="font-mono text-blue-500 uppercase tracking-[0.6em] mb-6 text-[10px]">System_Architecture_Log</h3>
+            <h3 class="font-mono text-blue-500 uppercase tracking-[0.6em] mb-6 text-[10px]">Project Portfolio</h3>
             <p class="text-white/30 text-xs md:text-sm font-mono leading-relaxed uppercase tracking-tighter">
               Synthesizing cloud-native architectures into fluid, data-driven interfaces.
             </p>
@@ -68,47 +81,15 @@ export const prerender = false;
       </div>
     </section>
 
-    <section id="resume" class="min-h-screen w-full py-32 px-[5vw]">
-      <div class="max-w-6xl mx-auto text-center">
-        <div class="mb-24">
-          <h3 class="font-mono text-blue-500 uppercase tracking-[0.5em] mb-6 text-xs flex items-center justify-center gap-2">
-            <Activity size={14} class="animate-pulse" /> Official Documentation
-          </h3>
-          <h2 class="text-[clamp(3.5rem,10vw,7rem)] font-black italic uppercase tracking-tighter text-white leading-none">
-            Mission <span class="text-blue-500 text-glow">Briefing</span>
-          </h2>
-        </div>
-
-        <div class="relative group max-w-3xl mx-auto rounded-[3.5rem] border border-white/10 bg-white/[0.03] p-10 md:p-16 backdrop-blur-[50px] transition-all hover:border-blue-500/30 overflow-hidden shadow-2xl">
-          <div class="flex flex-col items-center gap-12 relative z-10">
-            <div class="h-24 w-24 rounded-3xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20 group-hover:scale-110 transition-all duration-500">
-              <FileText size={48} className="text-blue-500" />
-            </div>
-            <div class="space-y-4">
-              <h4 class="text-2xl md:text-4xl font-bold text-white uppercase tracking-tight italic">Abhiram_Resume.pdf</h4>
-              <p class="text-white/40 font-mono text-[clamp(0.7rem,1.5vw,0.9rem)] uppercase tracking-[0.2em]">
-                M.S. Computer Science • Purdue • Jan 2026
-              </p>
-            </div>
-            <div class="flex flex-col sm:flex-row justify-center gap-6 w-full max-w-md">
-              <a href="/resume.pdf" target="_blank" class="flex-1 flex items-center justify-center gap-3 px-8 py-5 bg-blue-600 hover:bg-blue-500 text-white font-bold uppercase tracking-widest rounded-2xl transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-                <Eye size={18} /> View
-              </a>
-              <a href="/resume.pdf" download class="flex-1 flex items-center justify-center gap-3 px-8 py-5 border border-white/10 hover:border-white/40 text-white font-bold uppercase tracking-widest rounded-2xl transition-all">
-                <Download size={18} /> Download
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section id="network" class="min-h-screen w-full py-32 px-[5vw] flex items-center justify-center">
       <LinkedInCard client:load />
     </section>
 
     <section id="certifications" class="min-h-screen w-full py-32 px-[5vw] flex items-center justify-center">
       <div class="max-w-7xl w-full">
+        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
+           Verified Credentials
+        </h2>
         <CertificationGrid client:load />
       </div>
     </section>
@@ -118,7 +99,7 @@ export const prerender = false;
         <div class="flex items-center gap-4 mb-12 justify-center">
           <Terminal size={18} class="text-blue-500 animate-pulse" />
           <span class="text-[10px] md:text-xs font-mono font-black text-blue-500 uppercase tracking-[0.5em]">
-            Direct_Uplink_Protocol
+            Get In Touch
           </span>
         </div>
         
@@ -148,7 +129,7 @@ export const prerender = false;
 
             <div class="pt-12 border-t border-white/5">
               <p class="text-[9px] font-mono text-white/20 uppercase tracking-[0.4em]">
-                Status: Connection_Stable // Purdue_University_Node
+                Status: Connection Stable // Purdue University Node
               </p>
             </div>
           </div>
@@ -159,8 +140,50 @@ export const prerender = false;
   </main>
 </Layout>
 
+<script>
+  async function initVisitorCounter() {
+    const countElement = document.getElementById('visitor-count');
+    if (!countElement) return;
+
+    try {
+      const response = await fetch('/api/visitor-count');
+      const data = await response.json();
+      
+      if (data.count) {
+        const targetCount = parseInt(data.count);
+        animateCount(countElement, targetCount);
+      }
+    } catch (error) {
+      console.error('Visitor counter failed:', error);
+    }
+  }
+
+  function animateCount(element: HTMLElement, target: number) {
+    let current = 0;
+    const duration = 2000; 
+    const start = performance.now();
+
+    function update(now: number) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Smooth easing (starts fast, slows down)
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      current = Math.floor(easeOut * target);
+      
+      element.innerText = current.toString().padStart(6, '0');
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      }
+    }
+    requestAnimationFrame(update);
+  }
+
+  window.addEventListener('load', initVisitorCounter);
+</script>
+
 <style is:global>
-  /* 3. PERFORMANCE & GLASS REFINEMENTS */
   :global(html) {
     scroll-behavior: smooth;
     overflow-y: auto !important;

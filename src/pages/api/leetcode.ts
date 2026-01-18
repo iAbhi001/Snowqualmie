@@ -1,27 +1,41 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async () => {
-  const handle = import.meta.env.PUBLIC_LEETCODE_USER || "mmulpuri";
-  const controller = new AbortController();
-  // Fail after 8 seconds to stay under the 10s serverless limit
-  const timeoutId = setTimeout(() => controller.abort(), 8000); 
-
+  // Use your actual username
+  const username = "mmulpuri";
+  
   try {
-    const response = await fetch(`https://leetcode-stats-api.herokuapp.com/${handle}`, {
-      signal: controller.signal
+    // 🚀 Using a reliable Unofficial Proxy API instead of direct GraphQL
+    const response = await fetch(`https://alfa-leetcode-api.onrender.com/${username}/solved`, {
+      method: "GET",
+      headers: { 
+        "Accept": "application/json"
+      }
     });
-    
-    clearTimeout(timeoutId);
-    
-    if (!response.ok) throw new Error('External_Node_Failure');
-    
+
+    if (!response.ok) {
+      throw new Error(`Proxy returned status: ${response.status}`);
+    }
+
     const data = await response.json();
-    return new Response(JSON.stringify(data), {
+
+    // Standardize the response format for your dashboard
+    return new Response(JSON.stringify({
+      totalSolved: data.solvedProblem || 0,
+      easySolved: data.easySolved || 0,
+      mediumSolved: data.mediumSolved || 0,
+      hardSolved: data.hardSolved || 0,
+      acceptanceRate: data.acceptanceRate || 0
+    }), { 
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
+
   } catch (error) {
-    console.error("LEETCODE_API_TIMEOUT:", error);
-    return new Response(JSON.stringify({ error: "Uplink_Timeout" }), { status: 504 });
+    console.error("LEETCODE_PROXY_ERROR:", error);
+    return new Response(JSON.stringify({ 
+      error: "Uplink Offline", 
+      details: "LeetCode Proxy is unreachable" 
+    }), { status: 500 });
   }
 };
