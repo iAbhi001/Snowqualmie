@@ -1,5 +1,5 @@
 import { CloudWatchClient, GetMetricDataCommand } from "@aws-sdk/client-cloudwatch";
-import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { DynamoDBClient, UpdateItemCommand, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
 const getEnv = (key: string) => import.meta.env[key] || process.env[key] || "";
 
@@ -12,33 +12,53 @@ const authConfig = {
 };
 
 const cwClient = new CloudWatchClient(authConfig);
-const s3Client = new S3Client(authConfig);
+const dbClient = new DynamoDBClient(authConfig);
 
 export async function getLiveMetrics() {
   const appId = getEnv("APP_ID");
-  if (!appId || !authConfig.credentials.accessKeyId) return { requests: 0, status: "OFFLINE" };
-
-  const command = new GetMetricDataCommand({
-    EndTime: new Date(),
-    StartTime: new Date(Date.now() - 24 * 3600 * 1000),
-    MetricDataQueries: [{
-      Id: "requests",
-      MetricStat: {
-        Metric: {
-          Namespace: "AWS/AmplifyHosting",
-          MetricName: "Requests",
-          Dimensions: [{ Name: "App", Value: appId }]
-        },
-        Period: 3600,
-        Stat: "Sum",
-      },
-    }],
-  });
-
+  if (!appId) return { requests: 0, status: "OFFLINE" };
   try {
+    const command = new GetMetricDataCommand({
+      EndTime: new Date(),
+      StartTime: new Date(Date.now() - 24 * 3600 * 1000),
+      MetricDataQueries: [{
+        Id: "requests",
+        MetricStat: {
+          Metric: {
+            Namespace: "AWS/AmplifyHosting",
+            MetricName: "Requests",
+            Dimensions: [{ Name: "App", Value: appId }]
+          },
+          Period: 3600,
+          Stat: "Sum",
+        },
+      }],
+    });
     const response = await cwClient.send(command);
     return { requests: response.MetricDataResults?.[0]?.Values?.[0] || 0, status: "ONLINE" };
   } catch { return { requests: 0, status: "OFFLINE" }; }
+}
+
+// 🚀 THIS WAS MISSING THE EXPORT KEYWORD
+export async function getVisitorCount() {
+  const tableName = "VisitorStats"; 
+  try {
+    await dbClient.send(new UpdateItemCommand({
+      TableName: tableName,
+      Key: { id: { S: "total_visitors" } },
+      UpdateExpression: "ADD #c :val",
+      ExpressionAttributeNames: { "#c": "count" },
+      ExpressionAttributeValues: { ":val": { N: "1" } }
+    }));
+    const res = await dbClient.send(new GetItemCommand({
+      TableName: tableName,
+      Key: { id: { S: "total_visitors" } }
+    }));
+    return res.Item?.count?.N || "000000";
+  } catch (err) {
+    console.error("DynamoDB Error:", err);
+    return "000000";
+  }
 }
 
 export async function getMarketData(symbol: string = 'AAPL') {
@@ -56,21 +76,11 @@ export async function getLatestNews() {
   if (!key) return [];
   try {
     const res = await fetch(`https://content.guardianapis.com/search?section=technology&api-key=${key}`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json'
-      }
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     });
     const data = await res.json();
     return data.response?.results || [];
   } catch { return []; }
 }
 
-export async function getCapturedInterests() {
-  const bucketName = getEnv("APP_S3_BUCKET");
-  if (!bucketName) return [];
-  try {
-    const data = await s3Client.send(new ListObjectsV2Command({ Bucket: bucketName, Prefix: "captured-interests/" }));
-    return data.Contents?.map((item, i) => ({ id: i, url: `https://${bucketName}.s3.amazonaws.com/${item.Key}` })) || [];
-  } catch { return []; }
-}
+export async function getCapturedInterests() { return []; }
