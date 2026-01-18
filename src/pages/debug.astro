@@ -1,0 +1,15 @@
+---
+// src/pages/debug.astro
+export const prerender = false;
+const envCheck = {
+  appId: process.env.APP_ID ? "FOUND" : "MISSING",
+  guardian: process.env.GUARDIAN_API_KEY ? "FOUND" : "MISSING",
+  vantage: process.env.ALPHA_VANTAGE_API_KEY ? "FOUND" : "MISSING",
+  nodeEnv: process.env.NODE_ENV
+};
+---
+<Layout title="Debug">
+  <pre class="text-white bg-black p-10 mt-20">
+    {JSON.stringify(envCheck, null, 2)}
+  </pre>
+</Layout>
