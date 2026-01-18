@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
-import { getVisitorCount } from '../../lib/aws';
+import { getLiveMetrics } from './aws';
 
 export const GET: APIRoute = async () => {
-  const count = await getVisitorCount();
-  return new Response(JSON.stringify({ count }), {
+  const data = await getLiveMetrics();
+  return new Response(JSON.stringify(data), {
     status: 200,
     headers: { "Content-Type": "application/json" }
   });

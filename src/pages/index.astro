@@ -6,7 +6,7 @@ import ProjectGrid from '../components/ProjectGrid.tsx';
 import LinkedInCard from '../components/LinkedInCard.tsx';
 import CertificationGrid from '../components/CertificationGrid.tsx';
 import Navbar from '../components/Navbar.astro';
-import { Mail, Terminal, ExternalLink } from 'lucide-react';
+import { Mail, Terminal, ExternalLink, Activity, TrendingUp, Newspaper } from 'lucide-react';
 
 export const prerender = false;
 ---
@@ -40,18 +40,38 @@ export const prerender = false;
       </div>
     </section>
 
-    <section class="w-full py-10 px-[5vw] flex justify-center -mt-20 mb-20">
-      <div class="flex items-center gap-6 px-8 py-4 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md transition-all hover:border-blue-500/20">
-        <div class="flex h-2 w-2 relative">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-        </div>
-        <p class="font-mono text-[10px] md:text-xs uppercase tracking-[0.4em] text-white/50">
-          Total Visitors: 
-          <span id="visitor-count" class="text-blue-500 font-black ml-2 text-glow">000000</span>
+    <section class="w-full py-10 px-[5vw] flex flex-wrap items-center justify-center gap-6 -mt-20 mb-20">
+      <div class="flex items-center gap-4 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
+        <div class="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
+          Visitors: <span id="visitor-count" class="text-blue-500 font-black ml-1 text-glow">000000</span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
+        <Activity size={12} id="metrics-icon" class="text-white/20" />
+        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
+          Uplink: <span id="metric-requests" class="text-blue-400 font-black ml-1">---</span>
+          <span id="uplink-status" class="ml-2 text-[8px] text-red-500 font-bold">OFFLINE</span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
+        <TrendingUp size={12} class="text-blue-500/50" />
+        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
+          Market: <span id="market-price" class="text-white font-bold ml-1">LOADING...</span>
         </p>
       </div>
     </section>
+
+    <div class="w-full bg-white/[0.02] border-y border-white/5 py-3 backdrop-blur-sm overflow-hidden whitespace-nowrap mb-20">
+        <div class="inline-block animate-marquee">
+            <span class="inline-flex items-center gap-4 px-8 text-[10px] font-mono uppercase tracking-[0.3em] text-white/40">
+                <Newspaper size={12} class="text-blue-500" />
+                <span id="news-ticker">INITIALIZING SECURE DATA STREAM...</span>
+            </span>
+        </div>
+    </div>
 
     <section id="leetcode" class="min-h-screen w-full flex flex-col items-center justify-center px-[5vw] bg-black/10 py-32">
       <div class="max-w-6xl w-full">
@@ -88,7 +108,7 @@ export const prerender = false;
     <section id="certifications" class="min-h-screen w-full py-32 px-[5vw] flex items-center justify-center">
       <div class="max-w-7xl w-full">
         <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
-           Verified Credentials
+            Verified Credentials
         </h2>
         <CertificationGrid client:load />
       </div>
@@ -141,46 +161,72 @@ export const prerender = false;
 </Layout>
 
 <script>
-  async function initVisitorCounter() {
-    const countElement = document.getElementById('visitor-count');
-    if (!countElement) return;
-
+  // --- 🛰️ TELEMETRY SYSTEM ---
+  async function syncDashboard() {
     try {
-      const response = await fetch('/api/visitor-count');
-      const data = await response.json();
-      
-      if (data.count) {
-        const targetCount = parseInt(data.count);
-        animateCount(countElement, targetCount);
+      // 1. Fetch Combined Telemetry (News + Market + AWS)
+      const res = await fetch('/api/telemetry');
+      const data = await res.json();
+
+      // Update Market
+      const marketEl = document.getElementById('market-price');
+      if (marketEl && data.market) {
+        marketEl.innerText = `$${parseFloat(data.market['05. price']).toFixed(2)}`;
       }
+
+      // Update News Ticker
+      const newsEl = document.getElementById('news-ticker');
+      if (newsEl && data.news?.length > 0) {
+        newsEl.innerText = data.news.map((n:any) => n.webTitle).join(' // ');
+      }
+
+      // Update Uplink Status
+      const statusEl = document.getElementById('uplink-status');
+      const reqEl = document.getElementById('metric-requests');
+      const iconEl = document.getElementById('metrics-icon');
+
+      if (data.aws?.status === "ONLINE") {
+        if (statusEl) {
+          statusEl.innerText = "ACTIVE";
+          statusEl.className = "ml-2 text-[8px] text-green-500 font-bold animate-pulse";
+        }
+        if (reqEl) reqEl.innerText = Math.floor(data.aws.requests).toString();
+        if (iconEl) iconEl.className = "text-blue-500 animate-pulse";
+      }
+
+      // 2. Update Visitor Counter (Separate API)
+      const vRes = await fetch('/api/visitor-count');
+      const vData = await vRes.json();
+      const vEl = document.getElementById('visitor-count');
+      if (vEl && vData.count) {
+        animateCount(vEl, parseInt(vData.count));
+      }
+
     } catch (error) {
-      console.error('Visitor counter failed:', error);
+      console.error('Telemetry Uplink Failed:', error);
     }
   }
 
   function animateCount(element: HTMLElement, target: number) {
-    let current = 0;
+    let current = parseInt(element.innerText) || 0;
     const duration = 2000; 
     const start = performance.now();
 
     function update(now: number) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
-      
-      // Smooth easing (starts fast, slows down)
       const easeOut = 1 - Math.pow(1 - progress, 3);
-      current = Math.floor(easeOut * target);
-      
-      element.innerText = current.toString().padStart(6, '0');
-
-      if (progress < 1) {
-        requestAnimationFrame(update);
-      }
+      const val = Math.floor(easeOut * target);
+      element.innerText = val.toString().padStart(6, '0');
+      if (progress < 1) requestAnimationFrame(update);
     }
     requestAnimationFrame(update);
   }
 
-  window.addEventListener('load', initVisitorCounter);
+  window.addEventListener('load', () => {
+    syncDashboard();
+    setInterval(syncDashboard, 60000); // Sync every minute
+  });
 </script>
 
 <style is:global>
@@ -203,6 +249,16 @@ export const prerender = false;
 
   .animate-fade-in {
     animation: fadeIn 1.5s ease-out forwards;
+  }
+
+  .animate-marquee {
+    display: inline-block;
+    animation: marquee 30s linear infinite;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
   }
 
   @keyframes fadeIn {
