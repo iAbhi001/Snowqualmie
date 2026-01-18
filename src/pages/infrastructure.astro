@@ -5,26 +5,24 @@ import CostMonitor from '../components/CostMonitor.astro';
 import Navbar from '../components/Navbar.astro';
 import { getLiveMetrics } from '../lib/aws';
 
-// Force Server-Side Rendering for live AWS data
+// Force Server-Side Rendering
 export const prerender = false;
 
-// Fetch Live Telemetry from AWS CloudWatch
-let liveRequests = null;
+// Fetch Initial Data for the first paint
+let initialMetrics = null;
 try {
-  liveRequests = await getLiveMetrics();
+  initialMetrics = await getLiveMetrics();
 } catch (e) {
   console.error("AWS_FETCH_ERROR", e);
 }
 
-const status = liveRequests !== null ? "ACTIVE" : "OFFLINE";
+const status = initialMetrics !== null ? "ACTIVE" : "OFFLINE";
 ---
 
 <Layout title="Cloud Ops | Infrastructure">
   <div class="fixed inset-0 z-0 bg-[#010206]">
     <div class="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.04] mix-blend-overlay pointer-events-none"></div>
-    
     <EarthCanvas client:only="react" />
-    
     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#010206]/40 to-[#010206]"></div>
   </div>
 
@@ -36,9 +34,9 @@ const status = liveRequests !== null ? "ACTIVE" : "OFFLINE";
         <div class="mb-12 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 border-l-2 border-blue-500/40 pl-6 backdrop-blur-sm py-2">
            <div class="flex flex-col gap-1">
               <div class="flex items-center gap-3">
-                 <div class={`h-2 w-2 rounded-full ${status === 'ACTIVE' ? 'bg-blue-400 animate-pulse shadow-[0_0_10px_#60a5fa]' : 'bg-red-500 shadow-[0_0_10px_#ef4444]'}`}></div>
+                 <div id="status-indicator" class={`h-2 w-2 rounded-full ${status === 'ACTIVE' ? 'bg-blue-400 animate-pulse shadow-[0_0_10px_#60a5fa]' : 'bg-red-500 shadow-[0_0_10px_#ef4444]'}`}></div>
                  <span class="text-[10px] font-mono font-black text-blue-400 tracking-[0.4em] uppercase">
-                    AWS_LIVE_TELEMETRY: {status}
+                    AWS_LIVE_TELEMETRY: <span id="status-text">{status}</span>
                  </span>
               </div>
               <p class="text-[9px] font-mono text-white/30 uppercase tracking-widest font-bold">
@@ -54,63 +52,70 @@ const status = liveRequests !== null ? "ACTIVE" : "OFFLINE";
            </div>
         </div>
 
-        <div class="animate-in fade-in slide-in-from-bottom-4 duration-1000">
-           <CostMonitor requests={liveRequests} />
+        <div id="telemetry-container" class="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+           <CostMonitor requests={initialMetrics} />
         </div>
 
      </div>
   </main>
 </Layout>
 
-<script is:inline>
-  /**
-   * Updates the system clock to America/New_York (ET)
-   */
+<script>
+  // 1. UPDATE CLOCK
   function updateClock() {
     const clock = document.getElementById('live-clock');
     if (clock) {
       const now = new Date();
       clock.innerText = now.toLocaleTimeString('en-US', { 
-        hour12: false, 
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'America/New_York' 
+        hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/New_York' 
       }) + ' ET';
     }
   }
-
-  // Refresh every second for real-time feel
   setInterval(updateClock, 1000);
   updateClock();
 
-  /**
-   * Data Persistence: Refresh from AWS API every 10 minutes
-   */
-  setTimeout(() => {
-    // Only refresh if the user is currently viewing the page
-    if (!document.hidden) {
-        window.location.reload();
+  // 2. REAL-TIME DATA POLLING (Every 30 seconds)
+  async function pollAWSTelemetry() {
+    try {
+      const response = await fetch('/api/metrics');
+      const data = await response.json();
+
+      if (data && data.status === "ONLINE") {
+        // Update Status UI
+        const statusText = document.getElementById('status-text');
+        const indicator = document.getElementById('status-indicator');
+        if (statusText) statusText.innerText = "ACTIVE";
+        if (indicator) indicator.className = "h-2 w-2 rounded-full bg-blue-400 animate-pulse shadow-[0_0_10px_#60a5fa]";
+
+        // 🚀 UPDATE NUMBERS IN COSTMONITOR
+        // Assuming your CostMonitor has elements with these IDs
+        const reqEl = document.getElementById('req-val');
+        const egressEl = document.getElementById('egress-val');
+        
+        if (reqEl) reqEl.innerText = Math.floor(data.requests).toString();
+        if (egressEl) egressEl.innerText = (data.egress / (1024 * 1024)).toFixed(2) + " MB";
+      }
+    } catch (err) {
+      console.error("Telemetry Sync Failed");
     }
-  }, 600000);
+  }
+
+  // Poll every 30 seconds instead of reloading the whole page
+  setInterval(pollAWSTelemetry, 30000);
 </script>
 
 <style is:global>
-  /* 5. GLOBAL STYLES & MOBILE OVERRIDES */
   html, body {
     overflow-y: auto !important;
     height: auto !important;
     min-height: 100vh;
     background: #010206;
     scroll-behavior: smooth;
-    /* Safe Area Support for iPhone 14 Pro */
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  /* Prevent interaction with the 3D globe */
   canvas { pointer-events: none !important; }
 
-  /* High-Tech Glass Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { 
@@ -118,18 +123,10 @@ const status = liveRequests !== null ? "ACTIVE" : "OFFLINE";
     border-radius: 20px; 
   }
 
-  /* Specific Adjustments for iPhone 14 Pro & Mobile */
   @media (max-width: 430px) {
-    main {
-      padding-top: 5.5rem !important; /* Clears Dynamic Island */
-    }
-    #live-clock {
-      font-size: 0.75rem;
-    }
+    main { padding-top: 5.5rem !important; }
+    #live-clock { font-size: 0.75rem; }
   }
 
-  /* Tabular numbers prevent the clock from jittering */
-  .tabular-nums {
-    font-variant-numeric: tabular-nums;
-  }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
 </style>

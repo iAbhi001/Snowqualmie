@@ -6,8 +6,9 @@ import ProjectGrid from '../components/ProjectGrid.tsx';
 import LinkedInCard from '../components/LinkedInCard.tsx';
 import CertificationGrid from '../components/CertificationGrid.tsx';
 import Navbar from '../components/Navbar.astro';
-import { Mail, Terminal, ExternalLink } from 'lucide-react';
+import { Mail, Terminal, ExternalLink, Activity } from 'lucide-react';
 
+// Required for dynamic API fetching on the homepage
 export const prerender = false;
 ---
 
@@ -40,8 +41,8 @@ export const prerender = false;
       </div>
     </section>
 
-    <section class="w-full py-10 px-[5vw] flex justify-center -mt-20 mb-20">
-      <div class="flex items-center gap-6 px-8 py-4 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md transition-all hover:border-blue-500/20">
+    <section class="w-full py-10 px-[5vw] flex flex-col md:flex-row items-center justify-center gap-8 -mt-20 mb-20">
+      <div class="flex items-center gap-6 px-8 py-4 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
         <div class="flex h-2 w-2 relative">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
@@ -51,96 +52,77 @@ export const prerender = false;
           <span id="visitor-count" class="text-blue-500 font-black ml-2 text-glow">000000</span>
         </p>
       </div>
+
+      <div class="flex items-center gap-6 px-8 py-4 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
+        <Activity size={14} id="metrics-icon" class="text-white/20 transition-colors duration-500" />
+        <p class="font-mono text-[10px] md:text-xs uppercase tracking-[0.4em] text-white/50">
+          Live Traffic: 
+          <span id="metric-requests" class="text-blue-400 font-black ml-2">---</span>
+          <span id="uplink-status" class="ml-2 text-[8px] text-red-500 font-bold uppercase tracking-wider">OFFLINE</span>
+        </p>
+      </div>
     </section>
 
     <section id="leetcode" class="min-h-screen w-full flex flex-col items-center justify-center px-[5vw] bg-black/10 py-32">
-      <div class="max-w-6xl w-full">
-        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
-          Problem Solving Stats
-        </h2>
-        <div class="backdrop-blur-xl rounded-[3rem] border border-white/5 bg-white/[0.01]">
-           <LeetCodeCard client:load /> 
-        </div>
-      </div>
-    </section>
-
-    <section id="builds" class="min-h-screen w-full py-32 px-[5vw]">
-      <div class="max-w-7xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-12">
-          <div class="max-w-xl text-left">
-            <h3 class="font-mono text-blue-500 uppercase tracking-[0.6em] mb-6 text-[10px]">Project Portfolio</h3>
-            <p class="text-white/30 text-xs md:text-sm font-mono leading-relaxed uppercase tracking-tighter">
-              Synthesizing cloud-native architectures into fluid, data-driven interfaces.
-            </p>
-          </div>
-          <h2 class="text-[clamp(3.5rem,10vw,7rem)] font-black italic uppercase tracking-tighter text-white leading-none">
-            Key <span class="text-blue-500">Builds</span>
+        <div class="max-w-6xl w-full">
+          <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
+            Problem Solving Stats
           </h2>
+          <div class="backdrop-blur-xl rounded-[3rem] border border-white/5 bg-white/[0.01]">
+             <LeetCodeCard client:load /> 
+          </div>
         </div>
-        <ProjectGrid client:load />
-      </div>
-    </section>
-
-    <section id="network" class="min-h-screen w-full py-32 px-[5vw] flex items-center justify-center">
-      <LinkedInCard client:load />
-    </section>
-
-    <section id="certifications" class="min-h-screen w-full py-32 px-[5vw] flex items-center justify-center">
-      <div class="max-w-7xl w-full">
-        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
-           Verified Credentials
-        </h2>
-        <CertificationGrid client:load />
-      </div>
-    </section>
-
-    <section id="contact" class="min-h-[80vh] w-full py-32 px-[5vw] flex items-center justify-center">
-      <div class="max-w-4xl w-full">
-        <div class="flex items-center gap-4 mb-12 justify-center">
-          <Terminal size={18} class="text-blue-500 animate-pulse" />
-          <span class="text-[10px] md:text-xs font-mono font-black text-blue-500 uppercase tracking-[0.5em]">
-            Get In Touch
-          </span>
-        </div>
-        
-        <div class="relative group p-12 md:p-20 rounded-[3.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-[60px] shadow-2xl text-center transition-all hover:border-blue-500/30">
-          <div class="space-y-8 relative z-10">
-            <h2 class="text-5xl md:text-7xl font-black italic text-white uppercase tracking-tighter leading-none">
-              Contact <span class="text-blue-500">Node</span>
-            </h2>
-            <p class="max-w-md mx-auto text-white/30 font-mono text-xs md:text-sm leading-relaxed uppercase tracking-tight">
-              Initiate a direct transmission via secure university channel for collaborations or inquiries.
-            </p>
-
-            <div class="relative inline-block mt-8">
-              <a 
-                href="mailto:mulpm01@purdue.edu" 
-                class="flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-white/5 border border-white/5 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all duration-500 group/email"
-              >
-                <Mail size={40} class="text-blue-500 mb-2" />
-                <span class="text-xl md:text-3xl font-mono font-bold text-white tracking-widest break-all">
-                  mulpm01@purdue.edu
-                </span>
-                <div class="flex items-center gap-2 text-[10px] font-mono text-blue-400/60 uppercase tracking-[0.3em] font-black">
-                  <ExternalLink size={12} /> Open Mail Client
-                </div>
-              </a>
-            </div>
-
-            <div class="pt-12 border-t border-white/5">
-              <p class="text-[9px] font-mono text-white/20 uppercase tracking-[0.4em]">
-                Status: Connection Stable // Purdue University Node
+      </section>
+  
+      <section id="builds" class="min-h-screen w-full py-32 px-[5vw]">
+        <div class="max-w-7xl mx-auto">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-12">
+            <div class="max-w-xl text-left">
+              <h3 class="font-mono text-blue-500 uppercase tracking-[0.6em] mb-6 text-[10px]">Project Portfolio</h3>
+              <p class="text-white/30 text-xs md:text-sm font-mono leading-relaxed uppercase tracking-tighter">
+                Synthesizing cloud-native architectures into fluid, data-driven interfaces.
               </p>
             </div>
+            <h2 class="text-[clamp(3.5rem,10vw,7rem)] font-black italic uppercase tracking-tighter text-white leading-none">
+              Key <span class="text-blue-500">Builds</span>
+            </h2>
           </div>
-          <div class="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-64 bg-blue-500/10 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+          <ProjectGrid client:load />
         </div>
-      </div>
-    </section>
+      </section>
+
+    <section id="contact" class="min-h-[80vh] w-full py-32 px-[5vw] flex items-center justify-center">
+        <div class="max-w-4xl w-full">
+          <div class="flex items-center gap-4 mb-12 justify-center">
+            <Terminal size={18} class="text-blue-500 animate-pulse" />
+            <span class="text-[10px] md:text-xs font-mono font-black text-blue-500 uppercase tracking-[0.5em]">
+              Get In Touch
+            </span>
+          </div>
+          
+          <div class="relative group p-12 md:p-20 rounded-[3.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-[60px] shadow-2xl text-center transition-all hover:border-blue-500/30">
+            <div class="space-y-8 relative z-10">
+              <h2 class="text-5xl md:text-7xl font-black italic text-white uppercase tracking-tighter leading-none">
+                Contact <span class="text-blue-500">Node</span>
+              </h2>
+              <div class="relative inline-block mt-8">
+                <a href="mailto:mulpm01@purdue.edu" class="flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-white/5 border border-white/5 hover:border-blue-500/40 transition-all duration-500">
+                  <Mail size={40} class="text-blue-500 mb-2" />
+                  <span class="text-xl md:text-3xl font-mono font-bold text-white tracking-widest break-all">
+                    mulpm01@purdue.edu
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
   </main>
 </Layout>
 
 <script>
+  // 1. VISITOR COUNTER LOGIC
   async function initVisitorCounter() {
     const countElement = document.getElementById('visitor-count');
     if (!countElement) return;
@@ -148,78 +130,74 @@ export const prerender = false;
     try {
       const response = await fetch('/api/visitor-count');
       const data = await response.json();
-      
       if (data.count) {
-        const targetCount = parseInt(data.count);
-        animateCount(countElement, targetCount);
+        // Custom animation function
+        let start = 0;
+        let end = parseInt(data.count);
+        let duration = 2000;
+        let startTimestamp = null;
+        
+        const step = (timestamp) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          countElement.innerHTML = Math.floor(progress * (end - start) + start).toString().padStart(6, '0');
+          if (progress < 1) {
+            window.requestAnimationFrame(step);
+          }
+        };
+        window.requestAnimationFrame(step);
       }
-    } catch (error) {
-      console.error('Visitor counter failed:', error);
+    } catch (e) { console.error("Visitor fetch failed"); }
+  }
+
+  // 2. REAL-TIME METRICS LOGIC
+  async function refreshMetrics() {
+    const statusEl = document.getElementById('uplink-status');
+    const reqEl = document.getElementById('metric-requests');
+    const iconEl = document.getElementById('metrics-icon');
+
+    try {
+      // Calls your created API route
+      const res = await fetch('/api/metrics');
+      const data = await res.json();
+
+      if (data && data.status === "ONLINE") {
+        if (statusEl) {
+          statusEl.innerText = "ACTIVE";
+          statusEl.className = "ml-2 text-[8px] text-green-500 font-bold uppercase animate-pulse tracking-wider";
+        }
+        if (reqEl) {
+            // Handles cases where data might be 0 but still online
+            reqEl.innerText = (data.requests || 0).toString();
+        }
+        if (iconEl) {
+            iconEl.classList.remove('text-white/20');
+            iconEl.classList.add('text-blue-500', 'animate-pulse');
+        }
+      }
+    } catch (err) {
+      if (statusEl) {
+          statusEl.innerText = "OFFLINE";
+          statusEl.className = "ml-2 text-[8px] text-red-500 font-bold uppercase tracking-wider";
+      }
     }
   }
 
-  function animateCount(element: HTMLElement, target: number) {
-    let current = 0;
-    const duration = 2000; 
-    const start = performance.now();
-
-    function update(now: number) {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Smooth easing (starts fast, slows down)
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      current = Math.floor(easeOut * target);
-      
-      element.innerText = current.toString().padStart(6, '0');
-
-      if (progress < 1) {
-        requestAnimationFrame(update);
-      }
-    }
-    requestAnimationFrame(update);
-  }
-
-  window.addEventListener('load', initVisitorCounter);
+  // Initialize on Load
+  window.addEventListener('load', () => {
+    initVisitorCounter();
+    refreshMetrics();
+    // Poll every 30 seconds
+    setInterval(refreshMetrics, 30000);
+  });
 </script>
 
 <style is:global>
-  :global(html) {
-    scroll-behavior: smooth;
-    overflow-y: auto !important;
-    height: auto !important;
-  }
-  :global(body) {
-    background-color: #030303;
-    margin: 0;
-    overflow-x: hidden;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .text-glow {
-    text-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 1.5s ease-out forwards;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 430px) {
-    main { gap: 4rem !important; }
-    h1 { font-size: 3.5rem !important; }
-    .rounded-[3.5rem] { border-radius: 2.5rem !important; }
-  }
-
+  :global(html) { scroll-behavior: smooth; overflow-y: auto !important; }
+  :global(body) { background-color: #030303; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  .text-glow { text-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
+  .animate-fade-in { animation: fadeIn 1.5s ease-out forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { 
-    background: rgba(59, 130, 246, 0.3); 
-    border-radius: 10px; 
-  }
+  ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.3); border-radius: 10px; }
 </style>
