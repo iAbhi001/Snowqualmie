@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import type { ProcessEnv } from 'node';
 
-// 🚀 MANUAL OVERRIDE FOR ONEDRIVE/WINDOWS
+
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 export const GET: APIRoute = async () => {
