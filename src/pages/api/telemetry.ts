@@ -1,24 +1,27 @@
 import type { APIRoute } from 'astro';
-import { getLiveMetrics, getMarketData, getLatestNews } from '../../lib/aws';
+import { getLiveMetrics } from '../../lib/aws';
 
 export const GET: APIRoute = async () => {
-  // Fetch all data in parallel to reduce load time
-  const [aws, market, news] = await Promise.all([
-    getLiveMetrics(),
-    getMarketData('AAPL'), // Tracking Apple Inc. as a tech baseline
-    getLatestNews()
-  ]);
-
-  return new Response(JSON.stringify({
-    aws,
-    market,
-    news: news.slice(0, 5), // Send top 5 headlines for the ticker
-    timestamp: new Date().toISOString()
-  }), {
-    status: 200,
-    headers: { 
-      "Content-Type": "application/json",
-      "Cache-Control": "public, max-age=60" // Cache for 1 minute to save API credits
-    }
-  });
+  try {
+    // We only call getLiveMetrics now since market/news were removed
+    const aws = await getLiveMetrics();
+    
+    return new Response(JSON.stringify({
+      aws: {
+        status: aws.status,
+        requests: 0 // Keep as 0 to satisfy frontend logic without crashing
+      }
+    }), {
+      status: 200,
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache" 
+      }
+    });
+  } catch (error) {
+    console.error("Telemetry API Error:", error);
+    return new Response(JSON.stringify({ 
+      aws: { status: "OFFLINE", requests: 0 } 
+    }), { status: 200 });
+  }
 };

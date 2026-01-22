@@ -6,16 +6,20 @@ import ProjectGrid from '../components/ProjectGrid.tsx';
 import LinkedInCard from '../components/LinkedInCard.tsx';
 import CertificationGrid from '../components/CertificationGrid.tsx';
 import Navbar from '../components/Navbar.astro';
-import { Mail, Terminal, ExternalLink, Activity, TrendingUp, Newspaper } from 'lucide-react';
+import { Mail, Terminal, ExternalLink, Activity, Cpu, Database, Cloud, Code2 } from 'lucide-react';
 
 export const prerender = false;
 ---
 
 <Layout title="Abhiram | Portfolio">
-  <div class="fixed inset-0 z-0 bg-[#030303]">
-    <div class="absolute inset-0 z-10 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none"></div>
+  <div class="fixed inset-0 z-0 bg-[#000000] overflow-hidden">
+    <div id="stars" class="absolute inset-0"></div>
+    <div id="stars2" class="absolute inset-0"></div>
+    <div id="stars3" class="absolute inset-0"></div>
+    
+    <div class="absolute inset-0 z-10 bg-[url('/noise.svg')] opacity-[0.04] mix-blend-overlay pointer-events-none"></div>
     <EarthCanvas client:only="react" />
-    <div class="absolute inset-0 z-20 bg-gradient-to-b from-transparent via-[#030303]/40 to-[#030303]"></div>
+    <div class="absolute inset-0 z-20 bg-gradient-to-b from-black/10 via-black/20 to-[#000000]"></div>
   </div>
 
   <Navbar />
@@ -40,7 +44,7 @@ export const prerender = false;
       </div>
     </section>
 
-    <section class="w-full py-10 px-[5vw] flex flex-wrap items-center justify-center gap-6 -mt-20 mb-20">
+    <section class="w-full py-10 px-[5vw] flex flex-wrap items-center justify-center gap-8 -mt-20 mb-20">
       <div class="flex items-center gap-4 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
         <div class="h-2 w-2 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
         <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
@@ -51,33 +55,52 @@ export const prerender = false;
       <div class="flex items-center gap-4 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
         <Activity size={12} id="metrics-icon" class="text-white/20" />
         <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
-          Uplink: <span id="metric-requests" class="text-blue-400 font-black ml-1">---</span>
-          <span id="uplink-status" class="ml-2 text-[8px] text-red-500 font-bold">OFFLINE</span>
-        </p>
-      </div>
-
-      <div class="flex items-center gap-4 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
-        <TrendingUp size={12} class="text-blue-500/50" />
-        <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
-          Market: <span id="market-price" class="text-white font-bold ml-1">LOADING...</span>
+          Uplink: <span id="uplink-status" class="ml-1 text-red-500 font-bold uppercase tracking-widest">OFFLINE</span>
         </p>
       </div>
     </section>
 
-    <div class="w-full bg-white/[0.02] border-y border-white/5 py-3 backdrop-blur-sm overflow-hidden whitespace-nowrap mb-20">
+    <div class="w-full bg-white/[0.01] border-y border-white/5 py-6 backdrop-blur-sm overflow-hidden whitespace-nowrap mb-20 relative">
+        <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent z-10"></div>
+        <div class="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10"></div>
+        
         <div class="inline-block animate-marquee">
-            <span class="inline-flex items-center gap-4 px-8 text-[10px] font-mono uppercase tracking-[0.3em] text-white/40">
-                <Newspaper size={12} class="text-blue-500" />
-                <span id="news-ticker">INITIALIZING SECURE DATA STREAM...</span>
-            </span>
+            <div class="inline-flex items-center gap-16 px-8 font-mono text-[11px] uppercase tracking-[0.4em] text-white/40">
+                <span class="flex items-center gap-2"><Code2 size={14} class="text-blue-500"/> React</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Cpu size={14} class="text-blue-500"/> TypeScript</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Cloud size={14} class="text-blue-500"/> AWS Cloud</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Database size={14} class="text-blue-500"/> DynamoDB</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Code2 size={14} class="text-blue-500"/> Astro</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Cpu size={14} class="text-blue-500"/> Node.js</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Database size={14} class="text-blue-500"/> Python</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Code2 size={14} class="text-blue-500"/> React</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Cpu size={14} class="text-blue-500"/> TypeScript</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Cloud size={14} class="text-blue-500"/> AWS Cloud</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Database size={14} class="text-blue-500"/> DynamoDB</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Code2 size={14} class="text-blue-500"/> Astro</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Cpu size={14} class="text-blue-500"/> Node.js</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2"><Database size={14} class="text-blue-500"/> Python</span>
+                <span class="text-white/10">//</span>
+            </div>
         </div>
     </div>
 
-    <section id="leetcode" class="min-h-screen w-full flex flex-col items-center justify-center px-[5vw] bg-black/10 py-32">
+    <section id="leetcode" class="min-h-screen w-full flex flex-col items-center justify-center px-[5vw] py-32">
       <div class="max-w-6xl w-full">
-        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
-          Problem Solving Stats
-        </h2>
+        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] uppercase mb-16">Problem Solving Stats</h2>
         <div class="backdrop-blur-xl rounded-[3rem] border border-white/5 bg-white/[0.01]">
            <LeetCodeCard client:load /> 
         </div>
@@ -89,13 +112,9 @@ export const prerender = false;
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-12">
           <div class="max-w-xl text-left">
             <h3 class="font-mono text-blue-500 uppercase tracking-[0.6em] mb-6 text-[10px]">Project Portfolio</h3>
-            <p class="text-white/30 text-xs md:text-sm font-mono leading-relaxed uppercase tracking-tighter">
-              Synthesizing cloud-native architectures into fluid, data-driven interfaces.
-            </p>
+            <p class="text-white/30 text-xs font-mono uppercase tracking-tighter">Synthesizing cloud-native architectures.</p>
           </div>
-          <h2 class="text-[clamp(3.5rem,10vw,7rem)] font-black italic uppercase tracking-tighter text-white leading-none">
-            Key <span class="text-blue-500">Builds</span>
-          </h2>
+          <h2 class="text-[clamp(3.5rem,10vw,7rem)] font-black italic uppercase tracking-tighter text-white leading-none">Key <span class="text-blue-500">Builds</span></h2>
         </div>
         <ProjectGrid client:load />
       </div>
@@ -107,53 +126,19 @@ export const prerender = false;
 
     <section id="certifications" class="min-h-screen w-full py-32 px-[5vw] flex items-center justify-center">
       <div class="max-w-7xl w-full">
-        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] md:text-xs uppercase mb-16">
-            Verified Credentials
-        </h2>
+        <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] uppercase mb-16">Verified Credentials</h2>
         <CertificationGrid client:load />
       </div>
     </section>
 
     <section id="contact" class="min-h-[80vh] w-full py-32 px-[5vw] flex items-center justify-center">
-      <div class="max-w-4xl w-full">
-        <div class="flex items-center gap-4 mb-12 justify-center">
-          <Terminal size={18} class="text-blue-500 animate-pulse" />
-          <span class="text-[10px] md:text-xs font-mono font-black text-blue-500 uppercase tracking-[0.5em]">
-            Get In Touch
-          </span>
-        </div>
-        
-        <div class="relative group p-12 md:p-20 rounded-[3.5rem] border border-white/10 bg-white/[0.02] backdrop-blur-[60px] shadow-2xl text-center transition-all hover:border-blue-500/30">
-          <div class="space-y-8 relative z-10">
-            <h2 class="text-5xl md:text-7xl font-black italic text-white uppercase tracking-tighter leading-none">
-              Contact <span class="text-blue-500">Node</span>
-            </h2>
-            <p class="max-w-md mx-auto text-white/30 font-mono text-xs md:text-sm leading-relaxed uppercase tracking-tight">
-              Initiate a direct transmission via secure university channel for collaborations or inquiries.
-            </p>
-
-            <div class="relative inline-block mt-8">
-              <a 
-                href="mailto:mulpm01@purdue.edu" 
-                class="flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-white/5 border border-white/5 hover:border-blue-500/40 hover:bg-blue-500/5 transition-all duration-500 group/email"
-              >
-                <Mail size={40} class="text-blue-500 mb-2" />
-                <span class="text-xl md:text-3xl font-mono font-bold text-white tracking-widest break-all">
-                  mulpm01@purdue.edu
-                </span>
-                <div class="flex items-center gap-2 text-[10px] font-mono text-blue-400/60 uppercase tracking-[0.3em] font-black">
-                  <ExternalLink size={12} /> Open Mail Client
-                </div>
-              </a>
-            </div>
-
-            <div class="pt-12 border-t border-white/5">
-              <p class="text-[9px] font-mono text-white/20 uppercase tracking-[0.4em]">
-                Status: Connection Stable // Purdue University Node
-              </p>
-            </div>
-          </div>
-          <div class="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-64 bg-blue-500/10 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+      <div class="max-w-4xl w-full text-center">
+        <div class="group p-12 md:p-20 rounded-[3.5rem] border border-white/10 bg-black backdrop-blur-[60px] shadow-2xl transition-all hover:border-blue-500/30">
+          <h2 class="text-5xl md:text-7xl font-black italic text-white uppercase tracking-tighter mb-8">Contact <span class="text-blue-500">Node</span></h2>
+          <a href="mailto:mulpm01@purdue.edu" class="inline-flex flex-col items-center gap-4 px-10 py-8 rounded-[2rem] bg-white/5 border border-white/5 hover:border-blue-500/40 transition-all duration-500">
+            <Mail size={40} class="text-blue-500" />
+            <span class="text-xl md:text-3xl font-mono font-bold text-white tracking-widest break-all">mulpm01@purdue.edu</span>
+          </a>
         </div>
       </div>
     </section>
@@ -161,63 +146,40 @@ export const prerender = false;
 </Layout>
 
 <script>
-  // --- 🛰️ TELEMETRY SYSTEM ---
   async function syncDashboard() {
     try {
-      // 1. Fetch Combined Telemetry (News + Market + AWS)
       const res = await fetch('/api/telemetry');
       const data = await res.json();
-
-      // Update Market
-      const marketEl = document.getElementById('market-price');
-      if (marketEl && data.market) {
-        marketEl.innerText = `$${parseFloat(data.market['05. price']).toFixed(2)}`;
-      }
-
-      // Update News Ticker
-      const newsEl = document.getElementById('news-ticker');
-      if (newsEl && data.news?.length > 0) {
-        newsEl.innerText = data.news.map((n:any) => n.webTitle).join(' // ');
-      }
-
-      // Update Uplink Status
       const statusEl = document.getElementById('uplink-status');
-      const reqEl = document.getElementById('metric-requests');
       const iconEl = document.getElementById('metrics-icon');
 
       if (data.aws?.status === "ONLINE") {
         if (statusEl) {
           statusEl.innerText = "ACTIVE";
-          statusEl.className = "ml-2 text-[8px] text-green-500 font-bold animate-pulse";
+          statusEl.className = "ml-1 text-blue-400 font-bold uppercase tracking-widest animate-pulse";
         }
-        if (reqEl) reqEl.innerText = Math.floor(data.aws.requests).toString();
-        if (iconEl) iconEl.className = "text-blue-500 animate-pulse";
+        if (iconEl) iconEl.setAttribute('class', 'lucide lucide-activity text-blue-500 animate-pulse');
       }
 
-      // 2. Update Visitor Counter (Separate API)
-      const vRes = await fetch('/api/visitor-count');
+      const alreadyHit = sessionStorage.getItem('v_hit');
+      const vRes = await fetch(`/api/visitor-count${!alreadyHit ? '?hit=true' : ''}`);
       const vData = await vRes.json();
-      const vEl = document.getElementById('visitor-count');
-      if (vEl && vData.count) {
-        animateCount(vEl, parseInt(vData.count));
-      }
+      if (!alreadyHit) sessionStorage.setItem('v_hit', 'true');
 
-    } catch (error) {
-      console.error('Telemetry Uplink Failed:', error);
-    }
+      const vEl = document.getElementById('visitor-count');
+      if (vEl && vData.count) animateCount(vEl, parseInt(vData.count));
+    } catch (e) { console.error('🛰️ Sync Failed'); }
   }
 
   function animateCount(element: HTMLElement, target: number) {
     let current = parseInt(element.innerText) || 0;
-    const duration = 2000; 
+    const duration = 2000;
     const start = performance.now();
-
     function update(now: number) {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       const easeOut = 1 - Math.pow(1 - progress, 3);
-      const val = Math.floor(easeOut * target);
-      element.innerText = val.toString().padStart(6, '0');
+      element.innerText = Math.floor(easeOut * target).toString().padStart(6, '0');
       if (progress < 1) requestAnimationFrame(update);
     }
     requestAnimationFrame(update);
@@ -225,57 +187,58 @@ export const prerender = false;
 
   window.addEventListener('load', () => {
     syncDashboard();
-    setInterval(syncDashboard, 60000); // Sync every minute
+    setInterval(syncDashboard, 60000); 
   });
 </script>
 
 <style is:global>
   :global(html) {
     scroll-behavior: smooth;
-    overflow-y: auto !important;
-    height: auto !important;
+    overflow-y: auto;
+    scrollbar-width: none;
+    background-color: #000000;
   }
-  :global(body) {
-    background-color: #030303;
-    margin: 0;
-    overflow-x: hidden;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
+  ::-webkit-scrollbar { display: none; }
+  :global(body) { margin: 0; overflow-x: hidden; }
+
+  /* --- STELLAR BACKGROUND GENERATOR --- */
+  /* Generate random stars using box-shadow */
+  #stars {
+    width: 1px;
+    height: 1px;
+    background: transparent;
+    box-shadow: 1452px 1451px #FFF , 246px 1452px #FFF, 1234px 12px #FFF, 456px 890px #FFF, 120px 450px #FFF, 1600px 300px #FFF, 800px 900px #FFF, 300px 1200px #FFF, 1400px 100px #FFF, 10px 800px #FFF;
+    animation: animStar 50s linear infinite;
+  }
+  #stars2 {
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    box-shadow: 123px 456px #FFF, 789px 123px #FFF, 456px 789px #FFF, 1000px 1000px #FFF, 1500px 200px #FFF, 200px 1500px #FFF;
+    animation: animStar 100s linear infinite;
+  }
+  #stars3 {
+    width: 3px;
+    height: 3px;
+    background: transparent;
+    box-shadow: 500px 500px #FFF, 1200px 800px #FFF, 100px 1400px #FFF;
+    animation: animStar 150s linear infinite;
   }
 
-  .text-glow {
-    text-shadow: 0 0 30px rgba(59, 130, 246, 0.4);
+  @keyframes animStar {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-2000px); }
   }
 
-  .animate-fade-in {
-    animation: fadeIn 1.5s ease-out forwards;
-  }
-
-  .animate-marquee {
-    display: inline-block;
-    animation: marquee 30s linear infinite;
-  }
-
+  .text-glow { text-shadow: 0 0 30px rgba(59, 130, 246, 0.4); }
+  .animate-marquee { display: inline-block; animation: marquee 30s linear infinite; }
   @keyframes marquee {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
-
+  .animate-fade-in { animation: fadeIn 1.5s ease-out forwards; }
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 430px) {
-    main { gap: 4rem !important; }
-    h1 { font-size: 3.5rem !important; }
-    .rounded-[3.5rem] { border-radius: 2.5rem !important; }
-  }
-
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { 
-    background: rgba(59, 130, 246, 0.3); 
-    border-radius: 10px; 
   }
 </style>
