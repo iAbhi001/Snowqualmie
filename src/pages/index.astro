@@ -55,7 +55,7 @@ export const prerender = false;
       <div class="flex items-center gap-4 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-md">
         <Activity size={12} id="metrics-icon" class="text-white/20" />
         <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-white/50">
-          Uplink: <span id="uplink-status" class="ml-1 text-red-500 font-bold uppercase tracking-widest">OFFLINE</span>
+          Uplink: <span id="uplink-status" class="ml-1 text-yellow-500 font-bold uppercase tracking-widest animate-pulse">SYNCING</span>
         </p>
       </div>
     </section>
@@ -87,7 +87,7 @@ export const prerender = false;
       <div class="max-w-6xl w-full">
         <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] uppercase mb-16">Problem Solving Stats</h2>
         <div class="backdrop-blur-xl rounded-[3rem] border border-white/5 bg-white/[0.01]">
-           <LeetCodeCard client:only = "react" /> 
+           <LeetCodeCard client:only="react" /> 
         </div>
       </div>
     </section>
@@ -133,31 +133,41 @@ export const prerender = false;
 <script>
   async function syncDashboard() {
     try {
+      // 1. Telemetry Sync
       const res = await fetch('/api/telemetry');
       const data = await res.json();
       const statusEl = document.getElementById('uplink-status');
       const iconEl = document.getElementById('metrics-icon');
 
-      if (data.aws?.status === "ONLINE") {
+      if (data.aws?.status === "ONLINE" || data.status === "ONLINE") {
         if (statusEl) {
           statusEl.innerText = "ACTIVE";
           statusEl.className = "ml-1 text-blue-400 font-bold uppercase tracking-widest animate-pulse";
         }
         if (iconEl) iconEl.setAttribute('class', 'lucide lucide-activity text-blue-500 animate-pulse');
+      } else if (statusEl) {
+          statusEl.innerText = "OFFLINE";
+          statusEl.className = "ml-1 text-red-500 font-bold uppercase tracking-widest";
       }
 
+      // 2. Visitor Sync
       const alreadyHit = sessionStorage.getItem('v_hit');
       const vRes = await fetch(`/api/visitor-count${!alreadyHit ? '?hit=true' : ''}`);
       const vData = await vRes.json();
       if (!alreadyHit) sessionStorage.setItem('v_hit', 'true');
 
       const vEl = document.getElementById('visitor-count');
-      if (vEl && vData.count) animateCount(vEl, parseInt(vData.count));
-    } catch (e) { console.error('🛰️ Sync Failed'); }
+      if (vEl && vData.count) {
+          animateCount(vEl, parseInt(vData.count));
+      }
+    } catch (e) { 
+      console.error('🛰️ Sync Failed');
+      const statusEl = document.getElementById('uplink-status');
+      if (statusEl) statusEl.innerText = "OFFLINE";
+    }
   }
 
   function animateCount(element: HTMLElement, target: number) {
-    let current = parseInt(element.innerText) || 0;
     const duration = 2000;
     const start = performance.now();
     function update(now: number) {
@@ -170,10 +180,8 @@ export const prerender = false;
     requestAnimationFrame(update);
   }
 
-  window.addEventListener('load', () => {
-    syncDashboard();
-    setInterval(syncDashboard, 60000); 
-  });
+  // Execution
+  window.addEventListener('load', syncDashboard);
 </script>
 
 <style is:global>
@@ -225,3 +233,4 @@ export const prerender = false;
     to { opacity: 1; transform: translateY(0); }
   }
 </style>
+
