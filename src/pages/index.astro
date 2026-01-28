@@ -87,7 +87,7 @@ export const prerender = false;
       <div class="max-w-6xl w-full">
         <h2 class="text-blue-500 font-mono tracking-[0.6em] text-center text-[10px] uppercase mb-16">Problem Solving Stats</h2>
         <div class="backdrop-blur-xl rounded-[3rem] border border-white/5 bg-white/[0.01]">
-           <LeetCodeCard client:load /> 
+           <LeetCodeCard client:only = "react" /> 
         </div>
       </div>
     </section>
