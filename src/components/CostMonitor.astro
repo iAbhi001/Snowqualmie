@@ -6,10 +6,15 @@ import {
   AlertCircle, 
   Cpu 
 } from 'lucide-react';
-import { getLiveMetrics } from '../lib/aws';
+import { getLiveMetrics, getTotalCost } from '../lib/aws';
 
-// FETCH LIVE TELEMETRY
+// FETCH LIVE TELEMETRY AND COST
 const data = await getLiveMetrics();
+const yearlyCost = await getTotalCost();
+
+// Split the cost into dollars and cents for the big display
+// e.g., "12.50" becomes ["12", "50"]
+const [dollars, cents] = yearlyCost.split('.');
 
 // Data Formatting Helpers
 const formatRequests = (val) => val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toString();
@@ -38,7 +43,7 @@ const metrics = [
   },
   { 
     title: 'Avg Latency', 
-    value: '14ms', // This is typically static unless using RUM
+    value: '14ms', 
     sub: 'Global TTL', 
     icon: Zap, 
     color: 'text-purple-500', 
@@ -72,7 +77,7 @@ const metrics = [
     <div class="relative inline-block mb-16 group/cost">
       <div class="flex items-center justify-end relative">
         <h1 class="text-[clamp(6rem,22vw,16rem)] font-black italic tracking-tighter text-white leading-none drop-shadow-[0_0_80px_rgba(59,130,246,0.15)] group-hover/cost:text-blue-500 transition-all duration-700">
-          $0<span class="text-blue-500 group-hover/cost:text-white transition-colors">.00</span>
+          ${dollars}<span class="text-blue-500 group-hover/cost:text-white transition-colors">.{cents}</span>
         </h1>
         <div class="flex flex-col items-start text-left border-l-[4px] border-blue-500 pl-8 ml-8 h-fit">
           <span class="text-[clamp(2.5rem,8vw,5.5rem)] font-black italic text-white uppercase tracking-tighter leading-[0.8]">USD</span>
