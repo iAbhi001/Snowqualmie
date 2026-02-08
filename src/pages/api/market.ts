@@ -30,3 +30,5 @@ export const GET: APIRoute = async ({ url }) => {
     return new Response(JSON.stringify({ error: 'SERVER ERROR' }), { status: 500 });
   }
 };
+
+// 3. TYPE THE MARKER: Ensures lat/lon are recognized as numbers
