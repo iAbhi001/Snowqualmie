@@ -6,24 +6,35 @@ import { CostExplorerClient, GetCostAndUsageCommand } from "@aws-sdk/client-cost
 // 🔧 Helper to grab environment variables in Astro/Vite/Node
 const getEnv = (key: string) => import.meta.env[key] || process.env[key] || "";
 
-// 🛰️ GLOBAL AWS CONFIGURATION
-const authConfig = {
-  region: "us-east-2", // Billing/Cost metrics are usually in us-east-1
-  credentials: {
-    accessKeyId: getEnv("APP_ACCESS_KEY_ID"),
-    secretAccessKey: getEnv("APP_SECRET_ACCESS_KEY"),
-  }
+/**
+ * 🛰️ REGIONAL CONFIGURATION
+ * DynamoDB and S3 are in Ohio (us-east-2).
+ * Cost Explorer and Amplify Global Metrics MUST use Virginia (us-east-1).
+ */
+const commonCredentials = {
+  accessKeyId: getEnv("APP_ACCESS_KEY_ID"),
+  secretAccessKey: getEnv("APP_SECRET_ACCESS_KEY"),
 };
 
-// Initialize Clients
-const cwClient = new CloudWatchClient(authConfig);
-const dbClient = new DynamoDBClient(authConfig);
-const s3Client = new S3Client(authConfig);
-const ceClient = new CostExplorerClient(authConfig);
+const ohioConfig = {
+  region: "us-east-2",
+  credentials: commonCredentials,
+};
+
+const virginiaConfig = {
+  region: "us-east-1",
+  credentials: commonCredentials,
+};
+
+// Initialize Clients in their required regions
+const cwClient = new CloudWatchClient(virginiaConfig); // Amplify metrics route through us-east-1
+const dbClient = new DynamoDBClient(ohioConfig);      // DynamoDB in Ohio
+const s3Client = new S3Client(ohioConfig);            // S3 in Ohio
+const ceClient = new CostExplorerClient(virginiaConfig); // Cost Explorer MUST be us-east-1
 
 /**
  * 💰 TOTAL COST (Cost Explorer)
- * Fetches the unblended cost from the start of the year to today.
+ * Region: us-east-1 (Global Billing Endpoint)
  */
 export async function getTotalCost() {
   try {
@@ -39,7 +50,6 @@ export async function getTotalCost() {
 
     const data = await ceClient.send(command);
     
-    // Sum the "Amount" field from all results in the time range
     const total = data.ResultsByTime?.reduce((acc, month) => {
       return acc + parseFloat(month.Total?.UnblendedCost?.Amount || "0");
     }, 0);
@@ -53,11 +63,14 @@ export async function getTotalCost() {
 
 /**
  * 🛰️ LIVE TELEMETRY (CloudWatch)
- * Pulls real-time request counts and egress data.
+ * Region: us-east-1 (Amplify Hosting Metrics)
  */
 export async function getLiveMetrics() {
-  const appId = getEnv("APP_ID"); // Your Amplify or CloudFront App ID
-  if (!appId) return null;
+  const appId = getEnv("APP_ID"); 
+  if (!appId) {
+    console.warn("AWS_CONFIG_WARNING: APP_ID is missing");
+    return null;
+  }
 
   try {
     const command = new GetMetricDataCommand({
@@ -96,7 +109,7 @@ export async function getLiveMetrics() {
     return {
       requests: res.MetricDataResults?.[0]?.Values?.[0] || 0,
       egress: res.MetricDataResults?.[1]?.Values?.[0] || 0,
-      errors: 0, // You can add a 4XX/5XX metric query here similarly
+      errors: 0,
       status: "ONLINE"
     };
   } catch (err) {
@@ -107,7 +120,7 @@ export async function getLiveMetrics() {
 
 /**
  * 👥 VISITOR COUNT (DynamoDB)
- * Increments and retrieves a global counter.
+ * Region: us-east-2
  */
 export async function getVisitorCount(shouldIncrement = false) {
   const tableName = "SiteMetrics"; 
@@ -134,10 +147,11 @@ export async function getVisitorCount(shouldIncrement = false) {
 
 /**
  * 📸 PHOTOGRAPHY GALLERY (S3)
- * Maps S3 objects to public URLs.
+ * Region: us-east-2
  */
 export async function getCapturedInterests() {
   const bucketName = getEnv("S3_PHOTO_BUCKET");
+  if (!bucketName) return [];
   
   try {
     const command = new ListObjectsV2Command({ Bucket: bucketName });
@@ -149,7 +163,7 @@ export async function getCapturedInterests() {
       .filter(item => item.Key && /\.(jpg|jpeg|png|webp)$/i.test(item.Key))
       .map(item => ({
         id: item.ETag,
-        url: `https://${bucketName}.s3.amazonaws.com/${item.Key}`,
+        url: `https://${bucketName}.s3.us-east-2.amazonaws.com/${item.Key}`,
         title: item.Key?.split('/').pop()?.split('.')[0] || "Untitled"
       }));
   } catch (err) {
