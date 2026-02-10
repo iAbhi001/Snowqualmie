@@ -4,9 +4,9 @@ import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { CostExplorerClient, GetCostAndUsageCommand } from "@aws-sdk/client-cost-explorer";
 
 /**
- * 🔧 ROBUST ENVIRONMENT HELPER
- * Astro/Amplify can be tricky with env vars. This checks both 
- * import.meta.env (Build-time) and process.env (Runtime).
+ * 🔧 ULTRA-ROBUST ENVIRONMENT HELPER
+ * This ensures variables are found whether Astro is building (meta.env)
+ * or the Amplify SSR Node server is running (process.env).
  */
 const getEnv = (key: string) => {
   if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
@@ -18,32 +18,24 @@ const getEnv = (key: string) => {
   return "";
 };
 
-// Common Credentials used across all regions
+// Unified Credential Configuration
 const commonCredentials = {
   accessKeyId: getEnv("APP_ACCESS_KEY_ID"),
   secretAccessKey: getEnv("APP_SECRET_ACCESS_KEY"),
 };
 
-// 📍 Regional Configurations
-const ohioConfig = {
-  region: "us-east-2",
-  credentials: commonCredentials,
-};
+// 📍 Region-Specific Configs
+const ohioConfig = { region: "us-east-2", credentials: commonCredentials };
+const virginiaConfig = { region: "us-east-1", credentials: commonCredentials };
 
-const virginiaConfig = {
-  region: "us-east-1",
-  credentials: commonCredentials,
-};
-
-// Initialize Clients
-const cwClient = new CloudWatchClient(virginiaConfig); // Metrics are Global/Virginia
-const ceClient = new CostExplorerClient(virginiaConfig); // Cost Explorer MUST be us-east-1
-const dbClient = new DynamoDBClient(ohioConfig);       // Your table is in Ohio
-const s3Client = new S3Client(ohioConfig);             // Your bucket is in Ohio
+// Initialize Regional Clients
+const cwClient = new CloudWatchClient(virginiaConfig); // Metrics are Virginia-based
+const ceClient = new CostExplorerClient(virginiaConfig); // Billing is us-east-1 ONLY
+const dbClient = new DynamoDBClient(ohioConfig);       // Table is in Ohio
+const s3Client = new S3Client(ohioConfig);             // Bucket is in Ohio
 
 /**
  * 💰 TOTAL COST (Cost Explorer)
- * Fetches unblended cost from start of year to today.
  */
 export async function getTotalCost() {
   try {
@@ -58,7 +50,6 @@ export async function getTotalCost() {
     });
 
     const data = await ceClient.send(command);
-    
     const total = data.ResultsByTime?.reduce((acc, month) => {
       return acc + parseFloat(month.Total?.UnblendedCost?.Amount || "0");
     }, 0);
@@ -72,19 +63,18 @@ export async function getTotalCost() {
 
 /**
  * 🛰️ LIVE TELEMETRY (CloudWatch)
- * Pulls real-time request counts and egress data from Amplify.
  */
 export async function getLiveMetrics() {
   const appId = getEnv("APP_ID"); 
   if (!appId) {
-    console.warn("AWS_CONFIG_WARNING: APP_ID is missing in environment");
+    console.error("CRITICAL: APP_ID is missing from Environment Variables");
     return null;
   }
 
   try {
     const command = new GetMetricDataCommand({
       EndTime: new Date(),
-      StartTime: new Date(Date.now() - 86400000), // Last 24 Hours
+      StartTime: new Date(Date.now() - 86400000), // Rolling 24h window
       MetricDataQueries: [
         {
           Id: "requests",
@@ -92,7 +82,7 @@ export async function getLiveMetrics() {
             Metric: {
               Namespace: "AWS/AmplifyHosting",
               MetricName: "Requests",
-              Dimensions: [{ Name: "App", Value: appId }]
+              Dimensions: [{ Name: "App", Value: appId }] // Dimension must be 'App'
             },
             Period: 86400,
             Stat: "Sum",
@@ -121,15 +111,14 @@ export async function getLiveMetrics() {
       errors: 0,
       status: "ONLINE"
     };
-  } catch (err) {
-    console.error("AWS_CLOUDWATCH_ERROR:", err);
+  } catch (err: any) {
+    console.error(`AWS_CW_ERROR (${err.name}):`, err.message);
     return null;
   }
 }
 
 /**
  * 👥 VISITOR COUNT (DynamoDB)
- * Increments and retrieves count from us-east-2 SiteMetrics table.
  */
 export async function getVisitorCount(shouldIncrement = false) {
   const tableName = "SiteMetrics"; 
@@ -156,7 +145,6 @@ export async function getVisitorCount(shouldIncrement = false) {
 
 /**
  * 📸 PHOTOGRAPHY GALLERY (S3)
- * Maps S3 objects to public URLs from us-east-2 bucket.
  */
 export async function getCapturedInterests() {
   const bucketName = getEnv("S3_PHOTO_BUCKET");
@@ -165,7 +153,6 @@ export async function getCapturedInterests() {
   try {
     const command = new ListObjectsV2Command({ Bucket: bucketName });
     const response = await s3Client.send(command);
-
     if (!response.Contents) return [];
 
     return response.Contents
