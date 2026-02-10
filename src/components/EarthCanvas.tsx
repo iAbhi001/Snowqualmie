@@ -9,7 +9,7 @@ interface Coords {
   lng: number;
 }
 
-// --- SHADERS (Optimized for performance) ---
+// --- SHADERS ---
 const AtmosphereShader = {
   vertexShader: `
     varying vec3 vNormal;
@@ -28,6 +28,11 @@ const AtmosphereShader = {
 };
 
 const EarthShader = {
+  uniforms: {
+    uDayTexture: { value: null },
+    uNightTexture: { value: null },
+    uSunDirection: { value: new THREE.Vector3() },
+  },
   vertexShader: `
     varying vec2 vUv;
     varying vec3 vNormal;
@@ -48,6 +53,7 @@ const EarthShader = {
       vec3 dayColor = texture2D(uDayTexture, vUv).rgb;
       vec3 nightColor = texture2D(uNightTexture, vUv).rgb;
       float intensity = dot(vNormal, uSunDirection);
+      
       vec3 dayBlue = dayColor * vec3(0.95, 1.0, 1.2); 
       vec3 finalColor = mix(nightColor, dayBlue, smoothstep(-0.25, 0.25, intensity));
       gl_FragColor = vec4(finalColor, 1.0);
@@ -57,42 +63,85 @@ const EarthShader = {
 
 // --- COMPONENTS ---
 
-function Satellite() {
-  const satRef = useRef<THREE.Group>(null);
-  const [isReady, setIsReady] = useState(false);
+/**
+ * 🌌 REALISTIC MULTI-COLORED GALAXY
+ */
+function Galaxy() {
+  const pointsRef = useRef<THREE.Points>(null);
+  const count = 12000; // High star density
+  const radius = 35; 
+  const branches = 3;
 
-  // Delay satellite initialization to prioritize Earth rendering
-  useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 500);
-    return () => clearTimeout(timer);
+  const [positions, colors] = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+    const colorInside = new THREE.Color("#ffaa60"); // Hot core
+    const colorOutside = new THREE.Color("#1b3984"); // Blue/Purple edge
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      const r = Math.random() * radius;
+      const branchAngle = ((i % branches) / branches) * Math.PI * 2;
+      const spinAngle = r * 0.15;
+
+      const randomX = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.4 * r;
+      const randomY = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.4 * r;
+      const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.4 * r;
+
+      positions[i3] = Math.cos(branchAngle + spinAngle) * r + randomX;
+      positions[i3 + 1] = randomY - 2; // Offset slightly below Earth
+      positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r + randomZ;
+
+      const mixedColor = colorInside.clone().lerp(colorOutside, r / radius);
+      colors[i3] = mixedColor.r;
+      colors[i3 + 1] = mixedColor.g;
+      colors[i3 + 2] = mixedColor.b;
+    }
+    return [positions, colors];
   }, []);
 
-  useFrame(({ clock }) => {
-    if (!isReady || !satRef.current) return;
-    const t = clock.getElapsedTime() * 0.3; 
-    satRef.current.position.x = Math.cos(t) * 5.5;
-    satRef.current.position.z = Math.sin(t) * 5.5;
-    satRef.current.position.y = Math.cos(t * 0.8) * 2.0;
-    satRef.current.lookAt(-3.5, 0, 0); 
+  useFrame(() => {
+    if (pointsRef.current) pointsRef.current.rotation.y += 0.0003;
   });
 
-  if (!isReady) return null;
+  return (
+    <points ref={pointsRef} position={[5, 0, -25]} rotation={[0.4, 0, 0]}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-color" count={count} array={colors} itemSize={3} />
+      </bufferGeometry>
+      <pointsMaterial 
+        size={0.12} 
+        vertexColors 
+        transparent 
+        opacity={0.6} 
+        blending={THREE.AdditiveBlending} 
+        depthWrite={false}
+      />
+    </points>
+  );
+}
+
+/**
+ * 🛰️ ORBITAL SATELLITE
+ */
+function Satellite() {
+  const satRef = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime() * 0.4;
+    if (satRef.current) {
+      satRef.current.position.set(Math.cos(t) * 5.2, Math.sin(t) * 2, Math.sin(t) * 5.2);
+      satRef.current.lookAt(0, 0, 0);
+    }
+  });
 
   return (
     <group ref={satRef}>
-      <Float speed={2} rotationIntensity={0.5} floatIntensity={0.5}>
-        <Trail width={0.4} length={4} color={new THREE.Color("#00f3ff")} attenuation={(t) => t * t}>
+      <Float speed={2} rotationIntensity={0.5}>
+        <Trail width={0.4} length={4} color={new THREE.Color("#00f3ff")}>
           <mesh>
             <boxGeometry args={[0.1, 0.1, 0.1]} />
             <meshStandardMaterial color="#00f3ff" emissive="#00f3ff" emissiveIntensity={2} />
-          </mesh>
-          <mesh position={[0.18, 0, 0]}>
-            <boxGeometry args={[0.22, 0.01, 0.1]} />
-            <meshStandardMaterial color="#1e3a8a" />
-          </mesh>
-          <mesh position={[-0.18, 0, 0]}>
-            <boxGeometry args={[0.22, 0.01, 0.1]} />
-            <meshStandardMaterial color="#1e3a8a" />
           </mesh>
         </Trail>
       </Float>
@@ -100,6 +149,9 @@ function Satellite() {
   );
 }
 
+/**
+ * 📍 USER GEOLOCATION MARKER
+ */
 function UserMarker({ lat, lon }: { lat: number, lon: number }) {
   const position = useMemo(() => {
     const phi = (90 - lat) * (Math.PI / 180);
@@ -119,15 +171,16 @@ function UserMarker({ lat, lon }: { lat: number, lon: number }) {
   );
 }
 
+/**
+ * 🌍 MAIN GLOBE COMPONENT
+ */
 function Globe({ coords }: { coords: Coords | null }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  
-  // ⚡ High-performance texture loading
   const [day, night] = useTexture(['/earth_day.jpg', '/earth_night.jpg']);
   day.colorSpace = night.colorSpace = THREE.SRGBColorSpace;
 
   useFrame(() => {
-    if (meshRef.current) meshRef.current.rotation.y += 0.001;
+    if (meshRef.current) meshRef.current.rotation.y += 0.0012;
   });
 
   const uniforms = useMemo(() => {
@@ -142,29 +195,25 @@ function Globe({ coords }: { coords: Coords | null }) {
 
   return (
     <group position={[-3.5, 0, 0]} rotation={[0.41, 0, 0]}>
-      <ambientLight intensity={0.6} />
+      <ambientLight intensity={0.4} />
       <pointLight position={[10, 10, 10]} intensity={1.5} />
-      
       <Satellite />
-
       <mesh scale={[1.02, 1.02, 1.02]}>
-        <sphereGeometry args={[3.8, 32, 32]} /> {/* Optimized Segments */}
+        <sphereGeometry args={[3.8, 32, 32]} />
         <shaderMaterial {...AtmosphereShader} side={THREE.BackSide} transparent />
       </mesh>
-
       <mesh ref={meshRef}>
-        <sphereGeometry args={[3.8, 64, 64]} /> {/* Optimized Segments */}
-        <shaderMaterial 
-          fragmentShader={EarthShader.fragmentShader} 
-          vertexShader={EarthShader.vertexShader} 
-          uniforms={uniforms} 
-        />
+        <sphereGeometry args={[3.8, 64, 64]} />
+        <shaderMaterial fragmentShader={EarthShader.fragmentShader} vertexShader={EarthShader.vertexShader} uniforms={uniforms} />
         {coords && <UserMarker lat={coords.lat} lon={coords.lng} />}
       </mesh>
     </group>
   );
 }
 
+/**
+ * 💎 ROOT CANVAS
+ */
 export default function EarthCanvas() {
   const [coords, setCoords] = useState<Coords | null>(null);
 
@@ -172,18 +221,19 @@ export default function EarthCanvas() {
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => setCoords({ lat: 40.4237, lng: -86.9212 }) 
+        () => setCoords({ lat: 40.4237, lng: -86.9212 }) // Purdue fallback
       );
     }
   }, []);
 
   return (
     <div className="fixed inset-0 -z-10 bg-[#010206]">
-      <Canvas dpr={[1, 1.5]} gl={{ antialias: false }}> {/* Performance Tweak */}
+      <Canvas dpr={[1, 1.5]} gl={{ antialias: false }}>
         <Suspense fallback={null}>
           <PerspectiveCamera makeDefault position={[0, 0, 11]} />
-          <OrbitControls enablePan={false} minDistance={7} maxDistance={15} rotateSpeed={0.5} />
+          <OrbitControls enablePan={false} minDistance={7} maxDistance={15} />
           <Stars radius={100} depth={50} count={3000} factor={4} fade />
+          <Galaxy />
           <Globe coords={coords} />
         </Suspense>
       </Canvas>
