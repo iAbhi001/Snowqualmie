@@ -3,19 +3,28 @@ import { DynamoDBClient, UpdateItemCommand, GetItemCommand } from "@aws-sdk/clie
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 import { CostExplorerClient, GetCostAndUsageCommand } from "@aws-sdk/client-cost-explorer";
 
-// 🔧 Helper to grab environment variables in Astro/Vite/Node
-const getEnv = (key: string) => import.meta.env[key] || process.env[key] || "";
-
 /**
- * 🛰️ REGIONAL CONFIGURATION
- * DynamoDB and S3 are in Ohio (us-east-2).
- * Cost Explorer and Amplify Global Metrics MUST use Virginia (us-east-1).
+ * 🔧 ROBUST ENVIRONMENT HELPER
+ * Astro/Amplify can be tricky with env vars. This checks both 
+ * import.meta.env (Build-time) and process.env (Runtime).
  */
+const getEnv = (key: string) => {
+  if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
+    return import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  return "";
+};
+
+// Common Credentials used across all regions
 const commonCredentials = {
   accessKeyId: getEnv("APP_ACCESS_KEY_ID"),
   secretAccessKey: getEnv("APP_SECRET_ACCESS_KEY"),
 };
 
+// 📍 Regional Configurations
 const ohioConfig = {
   region: "us-east-2",
   credentials: commonCredentials,
@@ -26,15 +35,15 @@ const virginiaConfig = {
   credentials: commonCredentials,
 };
 
-// Initialize Clients in their required regions
-const cwClient = new CloudWatchClient(virginiaConfig); // Amplify metrics route through us-east-1
-const dbClient = new DynamoDBClient(ohioConfig);      // DynamoDB in Ohio
-const s3Client = new S3Client(ohioConfig);            // S3 in Ohio
+// Initialize Clients
+const cwClient = new CloudWatchClient(virginiaConfig); // Metrics are Global/Virginia
 const ceClient = new CostExplorerClient(virginiaConfig); // Cost Explorer MUST be us-east-1
+const dbClient = new DynamoDBClient(ohioConfig);       // Your table is in Ohio
+const s3Client = new S3Client(ohioConfig);             // Your bucket is in Ohio
 
 /**
  * 💰 TOTAL COST (Cost Explorer)
- * Region: us-east-1 (Global Billing Endpoint)
+ * Fetches unblended cost from start of year to today.
  */
 export async function getTotalCost() {
   try {
@@ -63,12 +72,12 @@ export async function getTotalCost() {
 
 /**
  * 🛰️ LIVE TELEMETRY (CloudWatch)
- * Region: us-east-1 (Amplify Hosting Metrics)
+ * Pulls real-time request counts and egress data from Amplify.
  */
 export async function getLiveMetrics() {
   const appId = getEnv("APP_ID"); 
   if (!appId) {
-    console.warn("AWS_CONFIG_WARNING: APP_ID is missing");
+    console.warn("AWS_CONFIG_WARNING: APP_ID is missing in environment");
     return null;
   }
 
@@ -120,7 +129,7 @@ export async function getLiveMetrics() {
 
 /**
  * 👥 VISITOR COUNT (DynamoDB)
- * Region: us-east-2
+ * Increments and retrieves count from us-east-2 SiteMetrics table.
  */
 export async function getVisitorCount(shouldIncrement = false) {
   const tableName = "SiteMetrics"; 
@@ -147,7 +156,7 @@ export async function getVisitorCount(shouldIncrement = false) {
 
 /**
  * 📸 PHOTOGRAPHY GALLERY (S3)
- * Region: us-east-2
+ * Maps S3 objects to public URLs from us-east-2 bucket.
  */
 export async function getCapturedInterests() {
   const bucketName = getEnv("S3_PHOTO_BUCKET");

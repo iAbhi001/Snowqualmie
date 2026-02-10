@@ -9,17 +9,28 @@ import {
 import { getLiveMetrics, getTotalCost } from '../lib/aws';
 
 // FETCH LIVE TELEMETRY AND COST
+// Ensuring default values to prevent "undefined" crashes
 const data = await getLiveMetrics();
-const yearlyCost = await getTotalCost();
+const rawYearlyCost = await getTotalCost() || "0.00";
 
-// Split the cost into dollars and cents for the big display
-// e.g., "12.50" becomes ["12", "50"]
-const [dollars, cents] = yearlyCost.split('.');
+/**
+ * 🛠️ THE FIX: 
+ * Force conversion to string before splitting. 
+ * Even if yearlyCost comes back as a Number, this won't crash.
+ */
+const formattedCost = String(rawYearlyCost);
+const [dollars, cents] = formattedCost.includes('.') 
+  ? formattedCost.split('.') 
+  : [formattedCost, "00"];
 
 // Data Formatting Helpers
-const formatRequests = (val) => val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toString();
+const formatRequests = (val) => {
+  if (!val) return "0";
+  return val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val.toString();
+};
+
 const formatBytes = (bytes) => {
-  if (bytes === 0) return "0MB";
+  if (!bytes || bytes === 0) return "0MB";
   const mb = bytes / (1024 * 1024);
   return mb >= 1024 ? `${(mb / 1024).toFixed(1)}GB` : `${Math.round(mb)}MB`;
 };
@@ -51,17 +62,17 @@ const metrics = [
   },
   { 
     title: 'Error Rate', 
-    value: data ? `${((data.errors / (data.requests || 1)) * 100).toFixed(2)}%` : '0.00%', 
+    value: data?.requests ? `${((data.errors / data.requests) * 100).toFixed(2)}%` : '0.00%', 
     sub: 'Healthy State', 
     icon: AlertCircle, 
     color: 'text-orange-500', 
-    tag: data?.errors > 0 ? 'Action_Required' : 'Healthy' 
+    tag: (data?.errors > 0) ? 'Action_Required' : 'Healthy' 
   }
 ];
 ---
 
-<section id="infrastructure" class="relative w-full flex flex-col items-center justify-start group py-32">
-  <div class="w-full max-w-[1400px] relative z-10 text-right">
+<section id="infrastructure" class="relative w-full flex flex-col items-center justify-start group py-32 overflow-hidden">
+  <div class="w-full max-w-[1400px] relative z-10 text-right px-[5vw]">
     
     <div class="mb-10 flex flex-col items-end gap-2 opacity-50 group-hover:opacity-100 transition-opacity duration-700">
       <div class="flex items-center gap-2 text-blue-500 font-mono font-bold uppercase tracking-[0.4em] text-[10px]">
@@ -71,17 +82,19 @@ const metrics = [
         </span>
         <span>{data ? 'AWS_LIVE_TELEMETRY: ACTIVE' : 'UPLINK_STATUS: OFFLINE'}</span>
       </div>
-      <p class="text-white/40 font-mono uppercase tracking-[0.2em] text-[9px]">Node Path: US-EAST-1 (N. Virginia)</p>
+      <p class="text-white/40 font-mono uppercase tracking-[0.2em] text-[9px]">
+        Nodes: US-EAST-1 & US-EAST-2 (Ohio Hub)
+      </p>
     </div>
 
     <div class="relative inline-block mb-16 group/cost">
       <div class="flex items-center justify-end relative">
-        <h1 class="text-[clamp(6rem,22vw,16rem)] font-black italic tracking-tighter text-white leading-none drop-shadow-[0_0_80px_rgba(59,130,246,0.15)] group-hover/cost:text-blue-500 transition-all duration-700">
+        <h1 class="text-[clamp(5rem,18vw,12rem)] font-black italic tracking-tighter text-white leading-none drop-shadow-[0_0_80px_rgba(59,130,246,0.15)] group-hover/cost:text-blue-500 transition-all duration-700 select-none">
           ${dollars}<span class="text-blue-500 group-hover/cost:text-white transition-colors">.{cents}</span>
         </h1>
         <div class="flex flex-col items-start text-left border-l-[4px] border-blue-500 pl-8 ml-8 h-fit">
-          <span class="text-[clamp(2.5rem,8vw,5.5rem)] font-black italic text-white uppercase tracking-tighter leading-[0.8]">USD</span>
-          <span class="text-[clamp(0.6rem,1.2vw,0.85rem)] font-mono text-blue-400/60 uppercase tracking-[0.5em] mt-4 font-black whitespace-nowrap">YTD_Cumulative_Cost</span>
+          <span class="text-[clamp(2rem,6vw,4rem)] font-black italic text-white uppercase tracking-tighter leading-[0.8]">USD</span>
+          <span class="text-[clamp(0.5rem,1vw,0.75rem)] font-mono text-blue-400/60 uppercase tracking-[0.5em] mt-4 font-black whitespace-nowrap">YTD_Cumulative_Cost</span>
         </div>
       </div>
     </div>
@@ -95,6 +108,7 @@ const metrics = [
             </div>
             <Cpu size={14} class="text-white/5 group-hover:text-white/20 transition-colors" />
           </div>
+          
           <div class="space-y-2">
             <h3 class="text-[2.2rem] font-black italic text-white uppercase tracking-tighter leading-none group-hover:text-blue-400 transition-colors">
               {m.value}
@@ -103,6 +117,7 @@ const metrics = [
               {m.sub}
             </p>
           </div>
+          
           <div class="mt-8 flex justify-between items-center">
             <span class="inline-block px-4 py-1.5 rounded-full bg-blue-500/5 border border-blue-500/10 text-[9px] font-mono font-bold text-blue-400/60 uppercase tracking-widest group-hover:border-blue-500/40">
               {m.tag}
