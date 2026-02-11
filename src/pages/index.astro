@@ -31,16 +31,16 @@ export const prerender = false;
   <main class="relative z-10 w-full antialiased font-inter">
     
     <section id="home" class="h-screen w-full flex items-center justify-end px-[8vw] py-20">
-      <div class="text-right animate-fade-in w-full max-w-7xl">
-        <h1 class="hero-name text-[clamp(3.5rem,10vw,8rem)] leading-tight select-none">
+      <div class="text-right w-full max-w-7xl">
+        <h1 class="hero-name text-[clamp(3.5rem,10vw,8rem)] leading-tight select-none opacity-0 animate-name-slide-up">
           Abhiram
         </h1>
         
-        <p class="hero-tagline text-[clamp(1rem,2.5vw,1.6rem)] text-white/80 mt-1 pr-1">
+        <p class="hero-tagline text-[clamp(1rem,2.5vw,1.6rem)] text-white/80 mt-1 pr-1 opacity-0 animate-tagline-slide-down">
           Architecting the Digital Cosmos
         </p>
         
-        <div class="mt-12 border-t border-white/10 pt-10 inline-block">
+        <div class="mt-12 border-t border-white/10 pt-10 inline-block opacity-0 animate-details-fade">
           <p class="text-[clamp(1rem,2.2vw,1.4rem)] text-white font-semibold tracking-tight leading-none uppercase">
             Purdue University
           </p>
@@ -70,7 +70,6 @@ export const prerender = false;
     <div class="w-full bg-white/[0.01] border-y border-white/5 py-8 backdrop-blur-sm overflow-hidden whitespace-nowrap mb-20 relative">
         <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent z-10"></div>
         <div class="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10"></div>
-        
         <div class="inline-block animate-marquee">
             <div class="inline-flex items-center gap-16 px-8 text-[11px] font-bold uppercase tracking-[0.3em] text-white/30">
                 <span class="flex items-center gap-2"><Code2 size={13} class="text-blue-500"/> React</span>
@@ -94,7 +93,7 @@ export const prerender = false;
       <div class="max-w-5xl w-full">
         <h2 class="section-title">Statistical Performance</h2>
         <div class="backdrop-blur-3xl rounded-[2.5rem] border border-white/5 bg-white/[0.01] p-2">
-           <LeetCodeCard client:only="react" /> 
+            <LeetCodeCard client:only="react" /> 
         </div>
       </div>
     </section>
@@ -170,6 +169,34 @@ export const prerender = false;
 
   ::-webkit-scrollbar { display: none; }
 
+  /* 🚀 THE NEW ANIMATIONS */
+  .animate-name-slide-up {
+    animation: nameSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .animate-tagline-slide-down {
+    animation: taglineSlideDown 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  }
+
+  .animate-details-fade {
+    animation: detailsFade 1.5s ease-out 0.8s forwards;
+  }
+
+  @keyframes nameSlideUp {
+    0% { transform: translateY(40px); opacity: 0; filter: blur(10px); }
+    100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+  }
+
+  @keyframes taglineSlideDown {
+    0% { transform: translateY(-40px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 0.8; }
+  }
+
+  @keyframes detailsFade {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
   .hero-name {
     font-family: 'Segoe Script', 'Segoe UI Script', cursive;
     background: linear-gradient(to bottom, #ffffff 60%, #3b82f6 100%);
@@ -194,6 +221,4 @@ export const prerender = false;
   @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
   .animate-marquee { display: inline-block; animation: marquee 40s linear infinite; }
   @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-  .animate-fade-in { animation: fadeIn 1.2s forwards; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 </style>
