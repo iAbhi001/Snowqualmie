@@ -160,6 +160,7 @@ export const prerender = false;
       const vData = await vRes.json();
       if (vEl && vData.count) vEl.innerText = vData.count.toString().padStart(6, '0');
 
+      // Update AWS Cost directly from telemetry
       const cEl = document.getElementById('aws-cost');
       const dRes = await fetch('/api/telemetry'); 
       const dData = await dRes.json();
@@ -179,7 +180,7 @@ export const prerender = false;
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     let startX = 0, startY = 0;
     let isDragging = false;
-    const threshold = 10; // Drag sensitivity
+    const threshold = 10;
 
     el.addEventListener('mousedown', start);
     el.addEventListener('touchstart', start, { passive: false });
@@ -187,13 +188,9 @@ export const prerender = false;
     function start(e) {
       const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
       const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-      
-      startX = clientX;
-      startY = clientY;
-      pos3 = clientX;
-      pos4 = clientY;
+      pos3 = clientX; pos4 = clientY;
+      startX = clientX; startY = clientY;
       isDragging = false;
-
       document.addEventListener('mousemove', move);
       document.addEventListener('touchmove', move, { passive: false });
       document.addEventListener('mouseup', end);
@@ -203,28 +200,15 @@ export const prerender = false;
     function move(e) {
       const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
       const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-
       const dist = Math.sqrt(Math.pow(clientX - startX, 2) + Math.pow(clientY - startY, 2));
       
       if (dist > threshold) {
         isDragging = true;
         if (e.type === 'touchmove') e.preventDefault();
-
-        pos1 = pos3 - clientX;
-        pos2 = pos4 - clientY;
-        pos3 = clientX;
-        pos4 = clientY;
-
-        const newTop = el.offsetTop - pos2;
-        const newLeft = el.offsetLeft - pos1;
-
-        // Screen Boundaries
-        const pad = 15;
-        const maxW = window.innerWidth - el.offsetWidth - pad;
-        const maxH = window.innerHeight - el.offsetHeight - pad;
-
-        el.style.top = Math.min(Math.max(newTop, pad), maxH) + "px";
-        el.style.left = Math.min(Math.max(newLeft, pad), maxW) + "px";
+        pos1 = pos3 - clientX; pos2 = pos4 - clientY;
+        pos3 = clientX; pos4 = clientY;
+        el.style.top = (el.offsetTop - pos2) + "px";
+        el.style.left = (el.offsetLeft - pos1) + "px";
         el.style.bottom = "auto";
         el.style.right = "auto";
       }
@@ -235,12 +219,9 @@ export const prerender = false;
       document.removeEventListener('touchmove', move);
       document.removeEventListener('mouseup', end);
       document.removeEventListener('touchend', end);
-
       if (isDragging) {
-        // Prevent click if we were dragging
         const captureClick = (e) => {
-          e.preventDefault();
-          e.stopImmediatePropagation();
+          e.preventDefault(); e.stopImmediatePropagation();
           link.removeEventListener('click', captureClick, true);
         };
         link.addEventListener('click', captureClick, true);
@@ -267,15 +248,10 @@ export const prerender = false;
 
   ::-webkit-scrollbar { display: none; }
 
-  .animate-name-slide-up {
-    animation: nameSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  }
-  .animate-tagline-slide-down {
-    animation: taglineSlideDown 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-  }
-  .animate-details-fade {
-    animation: detailsFade 1.5s ease-out 0.8s forwards;
-  }
+  .animate-name-slide-up { animation: nameSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+  .animate-tagline-slide-down { animation: taglineSlideDown 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards; }
+  .animate-details-fade { animation: detailsFade 1.5s ease-out 0.8s forwards; }
+  
   @keyframes nameSlideUp {
     0% { transform: translateY(40px); opacity: 0; filter: blur(10px); }
     100% { transform: translateY(0); opacity: 1; filter: blur(0); }
@@ -284,10 +260,7 @@ export const prerender = false;
     0% { transform: translateY(-40px); opacity: 0; }
     100% { transform: translateY(0); opacity: 0.8; }
   }
-  @keyframes detailsFade {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-  }
+  @keyframes detailsFade { 0% { opacity: 0; } 100% { opacity: 1; } }
 
   .hero-name {
     font-family: 'Segoe Script', 'Segoe UI Script', cursive;
