@@ -103,9 +103,14 @@ export const prerender = false;
     <section id="leetcode" class="min-h-screen w-full flex flex-col items-center justify-center px-[5vw] py-32">
       <div class="max-w-5xl w-full">
         <h2 class="section-title">Statistical Performance</h2>
-        <div class="backdrop-blur-3xl rounded-[2.5rem] border border-white/5 bg-white/[0.01] p-2">
-            <LeetCodeCard client:only="react" /> 
-        </div>
+        <a href="/leetcode" class="block group relative cursor-pointer">
+            <div class="backdrop-blur-3xl rounded-[2.5rem] border border-white/5 bg-white/[0.01] p-2 transition-all duration-500 group-hover:border-blue-500/30 group-hover:bg-white/[0.02]">
+                <div class="absolute top-6 right-10 z-20 text-blue-500/40 group-hover:text-blue-500 transition-colors pointer-events-none">
+                    <span class="text-[9px] font-bold uppercase tracking-widest flex items-center gap-2">Intelligence Dashboard <Code2 size={12}/></span>
+                </div>
+                <LeetCodeCard client:only="react" /> 
+            </div>
+        </a>
       </div>
     </section>
 
@@ -174,7 +179,7 @@ export const prerender = false;
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     let startX = 0, startY = 0;
     let isDragging = false;
-    const threshold = 8; // Pixels to move before triggering "drag mode"
+    const threshold = 10; // Drag sensitivity
 
     el.addEventListener('mousedown', start);
     el.addEventListener('touchstart', start, { passive: false });
@@ -213,7 +218,7 @@ export const prerender = false;
         const newTop = el.offsetTop - pos2;
         const newLeft = el.offsetLeft - pos1;
 
-        // Constraint check
+        // Screen Boundaries
         const pad = 15;
         const maxW = window.innerWidth - el.offsetWidth - pad;
         const maxH = window.innerHeight - el.offsetHeight - pad;
@@ -225,20 +230,20 @@ export const prerender = false;
       }
     }
 
-    function end(e) {
+    function end() {
       document.removeEventListener('mousemove', move);
       document.removeEventListener('touchmove', move);
       document.removeEventListener('mouseup', end);
       document.removeEventListener('touchend', end);
 
-      // CRITICAL: If we dragged, stop the click from firing on the link
       if (isDragging) {
-        const preventClick = (event) => {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          link.removeEventListener('click', preventClick, true);
+        // Prevent click if we were dragging
+        const captureClick = (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          link.removeEventListener('click', captureClick, true);
         };
-        link.addEventListener('click', preventClick, true);
+        link.addEventListener('click', captureClick, true);
       }
     }
   }

@@ -1,9 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
-import { Cloud, Activity, ShieldCheck, Database, HardDrive, ArrowLeft } from 'lucide-react';
+import { Cloud, Activity, ShieldCheck, Database, HardDrive, ArrowLeft, Clock } from 'lucide-react';
 
-// Force SSR for live metrics
 export const prerender = false;
 ---
 
@@ -12,27 +11,41 @@ export const prerender = false;
   
   <Navbar />
   
-  <main class="relative z-10 min-h-screen pt-32 pb-20 px-[5vw] font-inter">
+  <main class="relative z-10 min-h-screen pt-32 pb-20 px-[5vw] font-inter text-white">
     <div class="max-w-6xl mx-auto">
       
-      <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
         <div>
           <a href="/" class="inline-flex items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest mb-6 hover:gap-3 transition-all">
             <ArrowLeft size={14} /> Back to Nexus
           </a>
-          <h1 class="text-5xl font-black tracking-tighter uppercase text-white leading-none">
+          <h1 class="text-5xl font-black tracking-tighter uppercase leading-none">
             System <span class="text-blue-500">Hosts</span>
           </h1>
-          <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.3em] mt-4">
-            Region: us-east-2 // Status: <span class="text-green-500">Operational</span>
-          </p>
+          <div class="flex items-center gap-4 mt-6">
+            <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.3em]">
+              Region: us-east-2 // Ohio
+            </p>
+            <div class="h-1 w-1 rounded-full bg-white/20"></div>
+            <div class="flex items-center gap-2">
+                <Clock size={12} class="text-blue-500/50" />
+                <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.3em]">
+                  Last Sync: <span id="sync-time" class="text-blue-400">CONNECTING...</span>
+                </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="px-4 py-2 rounded-full border border-green-500/20 bg-green-500/5 flex items-center gap-2">
+            <div class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+            <span class="text-[9px] font-bold text-green-500 uppercase tracking-widest">Live Link Active</span>
         </div>
       </header>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div class="p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl group hover:border-blue-500/30 transition-all">
           <Cloud class="text-blue-500 mb-6 group-hover:scale-110 transition-transform" size={24} />
-          <h3 class="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-2">Compute Cost</h3>
+          <h3 class="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-2">Compute Cost (MTD)</h3>
           <p class="text-4xl font-mono font-bold text-white" id="host-cost">$0.00</p>
         </div>
 
@@ -81,13 +94,34 @@ export const prerender = false;
         
         const cEl = document.getElementById('host-cost');
         const eEl = document.getElementById('host-egress');
+        const timeEl = document.getElementById('sync-time');
         
+        // Update Stats
         if (cEl) cEl.innerText = `$${data.cost || "0.00"}`;
-        if (eEl) eEl.innerText = `${(data.egress / 1024 / 1024).toFixed(2)} MB`;
+        if (eEl) eEl.innerText = `${((data.egress || 0) / 1024 / 1024).toFixed(2)} MB`;
+        
+        // Update Timestamp in UTC
+        if (timeEl) {
+          const now = new Date();
+          // Extract the time part from the UTC string
+          const utcTime = now.toUTCString().split(' ')[4]; 
+          timeEl.innerText = `${utcTime} UTC`;
+        }
+
       } catch (e) {
+        const timeEl = document.getElementById('sync-time');
+        if (timeEl) {
+          timeEl.innerText = "OFFLINE";
+          timeEl.style.color = "#ef4444"; // Tailored red fallback
+        }
         console.error("Infrastructure link severed.");
       }
     }
+
+    // Run on mount
     fetchHostData();
+    
+    // Refresh every 30 seconds to keep metrics "warm"
+    setInterval(fetchHostData, 30000);
   </script>
 </Layout>
