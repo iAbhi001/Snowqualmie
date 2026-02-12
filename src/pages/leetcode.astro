@@ -2,54 +2,45 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import EarthCanvas from '../components/EarthCanvas.tsx';
-import { Trophy, Code2, Flame, CheckCircle2, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Trophy, Flame, CheckCircle2, ArrowLeft } from 'lucide-react';
 
 export const prerender = false;
 ---
 
-<Layout title="LeetCode Intelligence | Dashboard">
-  <div class="fixed inset-0 z-0 bg-[#000000] overflow-hidden">
+<Layout title="Algo Metrics | LeetCode Dashboard">
+  <div class="fixed inset-0 z-0 bg-black overflow-hidden">
     <div id="stars" class="absolute inset-0"></div>
-    <div id="stars2" class="absolute inset-0"></div>
-    <div id="stars3" class="absolute inset-0"></div>
-    
-    <div class="absolute inset-0 z-10 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none"></div>
     <EarthCanvas client:only="react" />
-    <div class="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-black/40 to-[#000000]"></div>
+    <div class="absolute inset-0 z-20 bg-gradient-to-b from-black/20 to-black"></div>
   </div>
 
   <Navbar />
 
-  <main class="relative z-10 min-h-screen pt-32 pb-20 px-[5vw] font-inter text-white">
+  <main class="relative z-10 min-h-screen pt-32 pb-20 px-[5vw] text-white font-inter">
     <div class="max-w-6xl mx-auto">
       
       <header class="mb-12">
-        <a href="/" class="inline-flex items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest mb-6 hover:gap-3 transition-all">
-          <ArrowLeft size={14} /> Return to Nexus
+        <a href="/" class="inline-flex items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest mb-6">
+          <ArrowLeft size={14} /> Back to Nexus
         </a>
-        <h1 class="text-5xl font-black tracking-tighter uppercase leading-none">
-          Algo <span class="text-blue-500">Metrics</span>
-        </h1>
-        <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.3em] mt-4">
-          Real-time synchronization with LeetCode Core
-        </p>
+        <h1 class="text-5xl font-black tracking-tighter uppercase">Algo <span class="text-blue-500">Metrics</span></h1>
       </header>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl">
+        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl border-b-yellow-500/20">
           <Trophy class="text-yellow-500 mb-4" size={20} />
-          <p class="text-white/30 text-[10px] font-bold uppercase tracking-widest">Total Solved</p>
+          <p class="text-[10px] font-bold uppercase text-white/30 tracking-widest">Total Solved</p>
           <p class="text-3xl font-mono font-bold" id="total-solved">---</p>
         </div>
-        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl">
+        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl border-b-green-500/20">
           <div class="text-green-500 text-[10px] font-bold uppercase mb-4">Easy</div>
           <p class="text-2xl font-mono font-bold" id="easy-solved">--</p>
         </div>
-        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl">
+        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl border-b-yellow-500/20">
           <div class="text-yellow-500 text-[10px] font-bold uppercase mb-4">Medium</div>
           <p class="text-2xl font-mono font-bold" id="medium-solved">--</p>
         </div>
-        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl">
+        <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl border-b-red-500/20">
           <div class="text-red-500 text-[10px] font-bold uppercase mb-4">Hard</div>
           <p class="text-2xl font-mono font-bold" id="hard-solved">--</p>
         </div>
@@ -57,26 +48,24 @@ export const prerender = false;
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div class="lg:col-span-2 p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.01] backdrop-blur-3xl">
-          <div class="flex items-center justify-between mb-8">
-            <h3 class="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-              <Flame size={18} class="text-orange-500" /> Contribution Matrix
-            </h3>
-          </div>
-          <div class="w-full overflow-x-auto">
+          <h3 class="text-sm font-bold uppercase tracking-widest flex items-center gap-2 mb-8">
+            <Flame size={18} class="text-orange-500" /> Contribution Matrix
+          </h3>
+          <div class="flex justify-center bg-white/[0.02] rounded-3xl p-6">
              <img 
-               src="https://leetcode-stats-api.herokuapp.com/charts/abhiram" 
-               alt="LeetCode Heatmap" 
-               class="min-w-[600px] invert opacity-80 hover:opacity-100 transition-opacity"
+               src="https://leetcard.jacoblin.cool/mmulpuri?theme=dark&font=Inter" 
+               alt="Heatmap" 
+               class="max-w-full h-auto select-none"
              />
           </div>
         </div>
 
         <div class="p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.01] backdrop-blur-3xl">
           <h3 class="text-sm font-bold uppercase tracking-widest mb-6 flex items-center gap-2">
-            <CheckCircle2 size={18} class="text-blue-500" /> Recent AC
+            <CheckCircle2 size={18} class="text-blue-500" /> Recent Accepted
           </h3>
-          <div id="recent-submissions" class="space-y-4">
-            <p class="text-white/20 text-xs animate-pulse">Fetching transmission...</p>
+          <div id="recent-submissions" class="space-y-3">
+             <div class="h-16 w-full rounded-2xl bg-white/5 animate-pulse"></div>
           </div>
         </div>
       </div>
@@ -84,42 +73,37 @@ export const prerender = false;
   </main>
 
   <script>
-    async function fetchLeetCodeData() {
+    function timeAgo(ts) {
+      const seconds = Math.floor((Date.now() / 1000) - Number(ts));
+      if (seconds < 3600) return Math.floor(seconds/60) + "m ago";
+      if (seconds < 86400) return Math.floor(seconds/3600) + "h ago";
+      return Math.floor(seconds/86400) + "d ago";
+    }
+
+    async function updateDashboard() {
       try {
         const res = await fetch('/api/leetcode');
         const data = await res.json();
 
-        document.getElementById('total-solved').innerText = data.totalSolved || '0';
-        document.getElementById('easy-solved').innerText = data.easySolved || '0';
-        document.getElementById('medium-solved').innerText = data.mediumSolved || '0';
-        document.getElementById('hard-solved').innerText = data.hardSolved || '0';
+        document.getElementById('total-solved').innerText = data.totalSolved;
+        document.getElementById('easy-solved').innerText = data.easySolved;
+        document.getElementById('medium-solved').innerText = data.mediumSolved;
+        document.getElementById('hard-solved').innerText = data.hardSolved;
 
-        const submissionContainer = document.getElementById('recent-submissions');
-        if(data.recentSubmissions && submissionContainer) {
-            submissionContainer.innerHTML = data.recentSubmissions.map(sub => `
-                <div class="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 group hover:border-blue-500/30 transition-all">
-                    <div>
-                        <p class="text-xs font-bold text-white/80">${sub.title}</p>
-                        <p class="text-[9px] text-white/30 uppercase mt-1">${sub.time}</p>
-                    </div>
-                    <div class="text-[10px] font-bold text-green-500">AC</div>
-                </div>
-            `).join('');
+        const container = document.getElementById('recent-submissions');
+        if(container && data.recentSubmissions) {
+          container.innerHTML = data.recentSubmissions.map(sub => `
+            <div class="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-blue-500/30 transition-all">
+              <div class="overflow-hidden">
+                <p class="text-[11px] font-bold text-white/80 truncate">${sub.title}</p>
+                <p class="text-[9px] text-white/30 uppercase mt-1">${timeAgo(sub.timestamp)}</p>
+              </div>
+              <span class="text-[9px] font-black text-green-500 ml-4">AC</span>
+            </div>
+          `).join('');
         }
-      } catch (e) {
-        console.error("Transmission failed.");
-      }
+      } catch (e) { console.error("Sync Error"); }
     }
-
-    fetchLeetCodeData();
+    updateDashboard();
   </script>
 </Layout>
-
-<style is:global>
-  /* Ensure star styles are present on this page */
-  #stars, #stars2, #stars3 { position: absolute; inset: 0; background: transparent; }
-  #stars { width: 1px; height: 1px; box-shadow: 1452px 1451px #FFF, 246px 1452px #FFF, 1234px 12px #FFF, 456px 890px #FFF; animation: animStar 50s linear infinite; }
-  #stars2 { width: 2px; height: 2px; box-shadow: 123px 456px #FFF, 789px 123px #FFF; animation: animStar 100s linear infinite; }
-  #stars3 { width: 3px; height: 3px; box-shadow: 500px 500px #FFF, 1200px 800px #FFF; animation: animStar 150s linear infinite; }
-  @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-</style>

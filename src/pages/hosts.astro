@@ -1,13 +1,22 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
+import EarthCanvas from '../components/EarthCanvas.tsx';
 import { Cloud, Activity, ShieldCheck, Database, HardDrive, ArrowLeft, Clock } from 'lucide-react';
 
 export const prerender = false;
 ---
 
 <Layout title="Infrastructure | Metrics">
-  <div class="fixed inset-0 z-0 bg-black"></div>
+  <div class="fixed inset-0 z-0 bg-[#000000] overflow-hidden">
+    <div id="stars" class="absolute inset-0"></div>
+    <div id="stars2" class="absolute inset-0"></div>
+    <div id="stars3" class="absolute inset-0"></div>
+    
+    <div class="absolute inset-0 z-10 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay pointer-events-none"></div>
+    <EarthCanvas client:only="react" />
+    <div class="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-black/40 to-[#000000]"></div>
+  </div>
   
   <Navbar />
   
@@ -63,7 +72,7 @@ export const prerender = false;
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01]">
+        <div class="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01] backdrop-blur-xl">
           <Database class="text-blue-500/40 mb-6" size={20} />
           <h4 class="text-lg font-bold text-white mb-2">DynamoDB Metrics</h4>
           <p class="text-white/40 text-sm leading-relaxed mb-6">Real-time visitor state persistence across global edge nodes.</p>
@@ -73,7 +82,7 @@ export const prerender = false;
           </div>
         </div>
 
-        <div class="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01]">
+        <div class="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01] backdrop-blur-xl">
           <HardDrive class="text-purple-500/40 mb-6" size={20} />
           <h4 class="text-lg font-bold text-white mb-2">S3 Object Storage</h4>
           <p class="text-white/40 text-sm leading-relaxed mb-6">Media assets and build artifacts distributed via Ohio regional bucket.</p>
@@ -96,32 +105,34 @@ export const prerender = false;
         const eEl = document.getElementById('host-egress');
         const timeEl = document.getElementById('sync-time');
         
-        // Update Stats
         if (cEl) cEl.innerText = `$${data.cost || "0.00"}`;
         if (eEl) eEl.innerText = `${((data.egress || 0) / 1024 / 1024).toFixed(2)} MB`;
         
-        // Update Timestamp in UTC
         if (timeEl) {
           const now = new Date();
-          // Extract the time part from the UTC string
           const utcTime = now.toUTCString().split(' ')[4]; 
           timeEl.innerText = `${utcTime} UTC`;
         }
-
       } catch (e) {
         const timeEl = document.getElementById('sync-time');
         if (timeEl) {
           timeEl.innerText = "OFFLINE";
-          timeEl.style.color = "#ef4444"; // Tailored red fallback
+          timeEl.style.color = "#ef4444";
         }
-        console.error("Infrastructure link severed.");
       }
     }
 
-    // Run on mount
     fetchHostData();
-    
-    // Refresh every 30 seconds to keep metrics "warm"
     setInterval(fetchHostData, 30000);
   </script>
 </Layout>
+
+<style is:global>
+  /* 🌌 Starfield Styles (Sync with index.astro) */
+  #stars, #stars2, #stars3 { position: absolute; inset: 0; background: transparent; }
+  #stars { width: 1px; height: 1px; box-shadow: 1452px 1451px #FFF, 246px 1452px #FFF, 1234px 12px #FFF, 456px 890px #FFF; animation: animStar 50s linear infinite; }
+  #stars2 { width: 2px; height: 2px; box-shadow: 123px 456px #FFF, 789px 123px #FFF; animation: animStar 100s linear infinite; }
+  #stars3 { width: 3px; height: 3px; box-shadow: 500px 500px #FFF, 1200px 800px #FFF; animation: animStar 150s linear infinite; }
+
+  @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
+</style>
