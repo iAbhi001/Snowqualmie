@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useMemo, Suspense } from 'react';
-import { Canvas, useLoader, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { Stars, PerspectiveCamera, Html, OrbitControls, Trail, Float, useTexture } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -68,15 +68,15 @@ const EarthShader = {
  */
 function Galaxy() {
   const pointsRef = useRef<THREE.Points>(null);
-  const count = 12000; // High star density
+  const count = 12000;
   const radius = 35; 
   const branches = 3;
 
   const [positions, colors] = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
-    const colorInside = new THREE.Color("#ffaa60"); // Hot core
-    const colorOutside = new THREE.Color("#1b3984"); // Blue/Purple edge
+    const colorInside = new THREE.Color("#ffaa60");
+    const colorOutside = new THREE.Color("#1b3984");
 
     for (let i = 0; i < count; i++) {
       const i3 = i * 3;
@@ -89,7 +89,7 @@ function Galaxy() {
       const randomZ = Math.pow(Math.random(), 3) * (Math.random() < 0.5 ? 1 : -1) * 0.4 * r;
 
       positions[i3] = Math.cos(branchAngle + spinAngle) * r + randomX;
-      positions[i3 + 1] = randomY - 2; // Offset slightly below Earth
+      positions[i3 + 1] = randomY - 2;
       positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * r + randomZ;
 
       const mixedColor = colorInside.clone().lerp(colorOutside, r / radius);
@@ -119,6 +119,77 @@ function Galaxy() {
         depthWrite={false}
       />
     </points>
+  );
+}
+
+/**
+ * 🛸 HIGH-SPEED INTERCEPTOR (Spaceship)
+ */
+function Interceptor({ speed = 1, color = "#ff3e3e", offset = 0 }) {
+  const meshRef = useRef<THREE.Group>(null);
+  
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime() * speed + offset;
+    if (meshRef.current) {
+      // Large elliptical path in the cosmic background
+      meshRef.current.position.set(
+        Math.cos(t * 0.5) * 22,
+        Math.sin(t * 0.3) * 12,
+        Math.sin(t * 0.5) * -18
+      );
+      meshRef.current.lookAt(0, 0, 0);
+      meshRef.current.rotateY(Math.PI / 2);
+    }
+  });
+
+  return (
+    <group ref={meshRef}>
+      <Trail width={0.6} length={10} color={new THREE.Color(color)} attenuation={(t) => t * t}>
+        <mesh>
+          <coneGeometry args={[0.06, 0.25, 3]} />
+          <meshBasicMaterial color={color} />
+        </mesh>
+      </Trail>
+      <pointLight distance={3} intensity={5} color={color} />
+    </group>
+  );
+}
+
+/**
+ * ✈️ SUB-ORBITAL TRAFFIC (Planes/High-Altitude Craft)
+ */
+function SubOrbitalTraffic({ count = 20 }) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  const flights = useMemo(() => {
+    return Array.from({ length: count }).map(() => ({
+      orbitSpeed: 0.05 + Math.random() * 0.15,
+      axis: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
+      radius: 3.9 + Math.random() * 0.2, // Just above surface
+      color: Math.random() > 0.6 ? "#ffffff" : "#00f3ff"
+    }));
+  }, [count]);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    groupRef.current?.children.forEach((child, i) => {
+      const f = flights[i];
+      const angle = t * f.orbitSpeed + i * 50;
+      const q = new THREE.Quaternion().setFromAxisAngle(f.axis, angle);
+      const pos = new THREE.Vector3(f.radius, 0, 0).applyQuaternion(q);
+      child.position.copy(pos);
+    });
+  });
+
+  return (
+    <group ref={groupRef}>
+      {flights.map((f, i) => (
+        <mesh key={i}>
+          <sphereGeometry args={[0.012, 8, 8]} />
+          <meshBasicMaterial color={f.color} transparent opacity={0.6} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -194,10 +265,11 @@ function Globe({ coords }: { coords: Coords | null }) {
   }, [day, night]);
 
   return (
-    <group position={[-3.5, 0, 0]} rotation={[0.41, 0, 0]}>
+    <>
       <ambientLight intensity={0.4} />
       <pointLight position={[10, 10, 10]} intensity={1.5} />
       <Satellite />
+      <SubOrbitalTraffic count={25} />
       <mesh scale={[1.02, 1.02, 1.02]}>
         <sphereGeometry args={[3.8, 32, 32]} />
         <shaderMaterial {...AtmosphereShader} side={THREE.BackSide} transparent />
@@ -207,7 +279,7 @@ function Globe({ coords }: { coords: Coords | null }) {
         <shaderMaterial fragmentShader={EarthShader.fragmentShader} vertexShader={EarthShader.vertexShader} uniforms={uniforms} />
         {coords && <UserMarker lat={coords.lat} lon={coords.lng} />}
       </mesh>
-    </group>
+    </>
   );
 }
 
@@ -233,8 +305,18 @@ export default function EarthCanvas() {
           <PerspectiveCamera makeDefault position={[0, 0, 11]} />
           <OrbitControls enablePan={false} minDistance={7} maxDistance={15} />
           <Stars radius={100} depth={50} count={3000} factor={4} fade />
+          
           <Galaxy />
-          <Globe coords={coords} />
+          
+          {/* Background Interceptors */}
+          <Interceptor speed={0.7} color="#00f3ff" offset={0} />
+          <Interceptor speed={0.5} color="#ff3e3e" offset={Math.PI} />
+
+          {/* Grouped Earth Elements */}
+          <group position={[-3.5, 0, 0]} rotation={[0.41, 0, 0]}>
+            <Globe coords={coords} />
+          </group>
+          
         </Suspense>
       </Canvas>
     </div>

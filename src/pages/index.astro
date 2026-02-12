@@ -6,7 +6,7 @@ import ProjectGrid from '../components/ProjectGrid.tsx';
 import LinkedInCard from '../components/LinkedInCard.tsx';
 import CertificationGrid from '../components/CertificationGrid.tsx';
 import Navbar from '../components/Navbar.astro';
-import { Mail, Activity, Cpu, Database, Cloud, Code2 } from 'lucide-react';
+import { Mail, Cpu, Database, Cloud, Code2, Banknote } from 'lucide-react';
 
 export const prerender = false;
 ---
@@ -27,6 +27,21 @@ export const prerender = false;
   </div>
 
   <Navbar />
+
+  <div class="fixed bottom-8 right-8 z-50 group">
+    <div class="flex items-center gap-4 px-5 py-4 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:border-blue-500/30 transition-all duration-500 hover:scale-105 shadow-2xl">
+      <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500">
+        <Banknote size={20} />
+      </div>
+      <div class="flex flex-col pr-2">
+        <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-white/30 mb-0.5">Infra Cost</span>
+        <div class="flex items-baseline gap-1">
+          <span class="text-xs font-bold text-white/40">$</span>
+          <span id="aws-cost" class="text-lg font-mono font-bold text-white tracking-tighter">0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <main class="relative z-10 w-full antialiased font-inter">
     
@@ -51,18 +66,11 @@ export const prerender = false;
       </div>
     </section>
 
-    <section class="w-full py-10 px-[5vw] flex flex-wrap items-center justify-center gap-10 -mt-20 mb-20">
-      <div class="flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-2xl">
-        <div class="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+    <section class="w-full py-10 px-[5vw] flex items-center justify-center -mt-20 mb-20">
+      <div class="flex items-center gap-3 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:border-blue-500/30 transition-colors duration-500">
+        <div class="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse"></div>
         <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-          Visitors: <span id="visitor-count" class="text-blue-500 font-extrabold ml-1">000000</span>
-        </p>
-      </div>
-
-      <div class="flex items-center gap-3 px-5 py-2.5 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-2xl">
-        <Activity size={10} id="metrics-icon" class="text-white/20" />
-        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-          Uplink: <span id="uplink-status" class="ml-1 text-yellow-500 font-extrabold tracking-widest">SYNCING</span>
+          Global Visitors: <span id="visitor-count" class="text-blue-500 font-extrabold ml-1">000000</span>
         </p>
       </div>
     </section>
@@ -137,27 +145,32 @@ export const prerender = false;
 </Layout>
 
 <script>
-  async function syncDashboard() {
+  async function syncDashboardData() {
     try {
-      const res = await fetch('/api/telemetry');
-      const data = await res.json();
-      const statusEl = document.getElementById('uplink-status');
-      if (statusEl && (data.aws?.status === "ONLINE" || data.status === "ONLINE")) {
-          statusEl.innerText = "ACTIVE";
-          statusEl.className = "ml-1 text-blue-400 font-extrabold tracking-widest animate-pulse";
-      }
+      // 1. Visitor Count Fetch
       const vEl = document.getElementById('visitor-count');
       const vRes = await fetch('/api/visitor-count');
       const vData = await vRes.json();
       if (vEl && vData.count) vEl.innerText = vData.count.toString().padStart(6, '0');
+
+      // 2. AWS Cost Fetch
+      const cEl = document.getElementById('aws-cost');
+      const dRes = await fetch('/api/telemetry'); 
+      const dData = await dRes.json();
+      if (cEl && dData.cost) {
+        // Simple clean up to prevent negative display
+        cEl.innerText = dData.cost.replace('-', '');
+      }
     } catch (e) { 
-      console.error('🛰️ Sync Failed');
+      console.error('🛰️ Dashboard Sync Failed');
     }
   }
-  window.addEventListener('load', syncDashboard);
+  window.addEventListener('load', syncDashboardData);
 </script>
 
 <style is:global>
+  /* ✅ OPTIMIZATION: @import MUST be at line 1 */
+  @import url('https://fonts.googleapis.com/css2?family=Birthstone+Bounce:wght@400;500&display=swap');
   @reference "../styles/global.css"; 
 
   :global(html) {
@@ -169,7 +182,7 @@ export const prerender = false;
 
   ::-webkit-scrollbar { display: none; }
 
-  /* 🚀 THE NEW ANIMATIONS */
+  /* 🚀 ANIMATIONS */
   .animate-name-slide-up {
     animation: nameSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
