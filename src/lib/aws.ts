@@ -146,24 +146,79 @@ export async function getVisitorCount(shouldIncrement = false) {
 /**
  * 📸 PHOTOGRAPHY GALLERY (S3)
  */
+/**
+ * 📸 PHOTOGRAPHY GALLERY (S3)
+ * Fetches objects from S3, sorts them by date, and formats for the UI.
+ */
+/**
+ * 📸 PHOTOGRAPHY GALLERY (S3)
+ * Optimized for the "captured-interests/" directory.
+ */
 export async function getCapturedInterests() {
-  const bucketName = getEnv("S3_PHOTO_BUCKET");
-  if (!bucketName) return [];
+  // 1. Clean the Environment Variables (Removes accidental spaces/slashes)
+  const rawBucket = getEnv("S3_PHOTO_BUCKET");
+  const bucketName = rawBucket?.trim().replace(/\/$/, ""); 
+  const region = "us-east-2"; 
+  
+  // 🎯 Folder name must match S3 EXACTLY (Case Sensitive)
+  const folderPrefix = "captured-interests/"; 
+  
+  if (!bucketName) {
+    console.error("❌ Environment Error: S3_PHOTO_BUCKET is not defined.");
+    return [];
+  }
   
   try {
-    const command = new ListObjectsV2Command({ Bucket: bucketName });
-    const response = await s3Client.send(command);
-    if (!response.Contents) return [];
+    const command = new ListObjectsV2Command({ 
+      Bucket: bucketName,
+      Prefix: folderPrefix, // Look inside the folder
+    });
 
-    return response.Contents
-      .filter(item => item.Key && /\.(jpg|jpeg|png|webp)$/i.test(item.Key))
-      .map(item => ({
-        id: item.ETag,
-        url: `https://${bucketName}.s3.us-east-2.amazonaws.com/${item.Key}`,
-        title: item.Key?.split('/').pop()?.split('.')[0] || "Untitled"
-      }));
-  } catch (err) {
-    console.error("AWS_S3_ERROR:", err);
+    console.log(`📡 Fetching from: ${bucketName}/${folderPrefix}`);
+    const response = await s3Client.send(command);
+    
+    // Check if S3 actually returned anything
+    if (!response.Contents || response.Contents.length === 0) {
+      console.warn(`⚠️ S3 returned 0 objects for prefix: ${folderPrefix}`);
+      return [];
+    }
+
+    const filteredPhotos = response.Contents
+      .filter(item => {
+        const key = item.Key || "";
+        // Skip the folder itself (which is returned as an object of size 0)
+        if (key === folderPrefix) return false;
+        // Match common image extensions
+        return /\.(jpg|jpeg|png|webp|avif)$/i.test(key);
+      })
+      .sort((a, b) => {
+        // Sort by upload date (Newest First)
+        return (b.LastModified?.getTime() || 0) - (a.LastModified?.getTime() || 0);
+      })
+      .map(item => {
+        const key = item.Key!;
+        const fileName = key.split('/').pop() || "";
+        
+        // Clean up title for the UI
+        const cleanTitle = fileName
+          .split('.')[0]
+          .replace(/[_-]/g, ' ')
+          .replace(/\b\w/g, l => l.toUpperCase());
+
+        return {
+          id: item.ETag?.replace(/"/g, '') || Math.random().toString(36),
+          // Ensure URL is correctly formatted
+          url: `https://${bucketName}.s3.${region}.amazonaws.com/${key}`,
+          title: cleanTitle,
+          lastModified: item.LastModified
+        };
+      });
+
+    console.log(`✅ Success: Formatted ${filteredPhotos.length} photos.`);
+    return filteredPhotos;
+
+  } catch (err: any) {
+    console.error("❌ AWS S3 Error:", err.message);
     return [];
   }
 }
