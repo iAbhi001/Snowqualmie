@@ -28,19 +28,24 @@ export const prerender = false;
 
   <Navbar />
 
-  <div class="fixed bottom-8 right-8 z-50 group">
-    <div class="flex items-center gap-4 px-5 py-4 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:border-blue-500/30 transition-all duration-500 hover:scale-105 shadow-2xl">
-      <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500">
-        <Banknote size={20} />
-      </div>
-      <div class="flex flex-col pr-2">
-        <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-white/30 mb-0.5">Infra Cost</span>
-        <div class="flex items-baseline gap-1">
-          <span class="text-xs font-bold text-white/40">$</span>
-          <span id="aws-cost" class="text-lg font-mono font-bold text-white tracking-tighter">0.00</span>
+  <div 
+    id="draggable-island" 
+    class="fixed bottom-8 right-8 z-50 cursor-move select-none touch-none group"
+  >
+    <a href="/hosts" id="island-link" class="block" ondragstart="return false;">
+      <div class="flex items-center gap-4 px-5 py-4 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:border-blue-500/30 transition-all duration-500 shadow-2xl active:scale-95 pointer-events-auto">
+        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors pointer-events-none">
+          <Banknote size={20} />
+        </div>
+        <div class="flex flex-col pr-2 pointer-events-none">
+          <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-white/30 mb-0.5">Infra Cost</span>
+          <div class="flex items-baseline gap-1">
+            <span class="text-xs font-bold text-white/40">$</span>
+            <span id="aws-cost" class="text-lg font-mono font-bold text-white tracking-tighter">0.00</span>
+          </div>
         </div>
       </div>
-    </div>
+    </a>
   </div>
 
   <main class="relative z-10 w-full antialiased font-inter">
@@ -50,11 +55,9 @@ export const prerender = false;
         <h1 class="hero-name text-[clamp(3.5rem,10vw,8rem)] leading-tight select-none opacity-0 animate-name-slide-up">
           Abhiram
         </h1>
-        
         <p class="hero-tagline text-[clamp(1rem,2.5vw,1.6rem)] text-white/80 mt-1 pr-1 opacity-0 animate-tagline-slide-down">
           Architecting the Digital Cosmos
         </p>
-        
         <div class="mt-12 border-t border-white/10 pt-10 inline-block opacity-0 animate-details-fade">
           <p class="text-[clamp(1rem,2.2vw,1.4rem)] text-white font-semibold tracking-tight leading-none uppercase">
             Purdue University
@@ -147,29 +150,106 @@ export const prerender = false;
 <script>
   async function syncDashboardData() {
     try {
-      // 1. Visitor Count Fetch
       const vEl = document.getElementById('visitor-count');
       const vRes = await fetch('/api/visitor-count');
       const vData = await vRes.json();
       if (vEl && vData.count) vEl.innerText = vData.count.toString().padStart(6, '0');
 
-      // 2. AWS Cost Fetch
       const cEl = document.getElementById('aws-cost');
       const dRes = await fetch('/api/telemetry'); 
       const dData = await dRes.json();
       if (cEl && dData.cost) {
-        // Simple clean up to prevent negative display
         cEl.innerText = dData.cost.replace('-', '');
       }
     } catch (e) { 
-      console.error('🛰️ Dashboard Sync Failed');
+      console.error('🛰️ Sync Failed');
     }
   }
-  window.addEventListener('load', syncDashboardData);
+
+  function initDraggable() {
+    const el = document.getElementById('draggable-island');
+    const link = document.getElementById('island-link');
+    if (!el || !link) return;
+
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let startX = 0, startY = 0;
+    let isDragging = false;
+    const threshold = 8; // Pixels to move before triggering "drag mode"
+
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, { passive: false });
+
+    function start(e) {
+      const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      
+      startX = clientX;
+      startY = clientY;
+      pos3 = clientX;
+      pos4 = clientY;
+      isDragging = false;
+
+      document.addEventListener('mousemove', move);
+      document.addEventListener('touchmove', move, { passive: false });
+      document.addEventListener('mouseup', end);
+      document.addEventListener('touchend', end);
+    }
+
+    function move(e) {
+      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+      const dist = Math.sqrt(Math.pow(clientX - startX, 2) + Math.pow(clientY - startY, 2));
+      
+      if (dist > threshold) {
+        isDragging = true;
+        if (e.type === 'touchmove') e.preventDefault();
+
+        pos1 = pos3 - clientX;
+        pos2 = pos4 - clientY;
+        pos3 = clientX;
+        pos4 = clientY;
+
+        const newTop = el.offsetTop - pos2;
+        const newLeft = el.offsetLeft - pos1;
+
+        // Constraint check
+        const pad = 15;
+        const maxW = window.innerWidth - el.offsetWidth - pad;
+        const maxH = window.innerHeight - el.offsetHeight - pad;
+
+        el.style.top = Math.min(Math.max(newTop, pad), maxH) + "px";
+        el.style.left = Math.min(Math.max(newLeft, pad), maxW) + "px";
+        el.style.bottom = "auto";
+        el.style.right = "auto";
+      }
+    }
+
+    function end(e) {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('touchmove', move);
+      document.removeEventListener('mouseup', end);
+      document.removeEventListener('touchend', end);
+
+      // CRITICAL: If we dragged, stop the click from firing on the link
+      if (isDragging) {
+        const preventClick = (event) => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          link.removeEventListener('click', preventClick, true);
+        };
+        link.addEventListener('click', preventClick, true);
+      }
+    }
+  }
+
+  window.addEventListener('load', () => {
+    syncDashboardData();
+    initDraggable();
+  });
 </script>
 
 <style is:global>
-  /* ✅ OPTIMIZATION: @import MUST be at line 1 */
   @import url('https://fonts.googleapis.com/css2?family=Birthstone+Bounce:wght@400;500&display=swap');
   @reference "../styles/global.css"; 
 
@@ -182,29 +262,23 @@ export const prerender = false;
 
   ::-webkit-scrollbar { display: none; }
 
-  /* 🚀 ANIMATIONS */
   .animate-name-slide-up {
     animation: nameSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
-
   .animate-tagline-slide-down {
     animation: taglineSlideDown 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
   }
-
   .animate-details-fade {
     animation: detailsFade 1.5s ease-out 0.8s forwards;
   }
-
   @keyframes nameSlideUp {
     0% { transform: translateY(40px); opacity: 0; filter: blur(10px); }
     100% { transform: translateY(0); opacity: 1; filter: blur(0); }
   }
-
   @keyframes taglineSlideDown {
     0% { transform: translateY(-40px); opacity: 0; }
     100% { transform: translateY(0); opacity: 0.8; }
   }
-
   @keyframes detailsFade {
     0% { opacity: 0; }
     100% { opacity: 1; }

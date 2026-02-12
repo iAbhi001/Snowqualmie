@@ -1,0 +1,93 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import { Cloud, Activity, ShieldCheck, Database, HardDrive, ArrowLeft } from 'lucide-react';
+
+// Force SSR for live metrics
+export const prerender = false;
+---
+
+<Layout title="Infrastructure | Metrics">
+  <div class="fixed inset-0 z-0 bg-black"></div>
+  
+  <Navbar />
+  
+  <main class="relative z-10 min-h-screen pt-32 pb-20 px-[5vw] font-inter">
+    <div class="max-w-6xl mx-auto">
+      
+      <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <a href="/" class="inline-flex items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest mb-6 hover:gap-3 transition-all">
+            <ArrowLeft size={14} /> Back to Nexus
+          </a>
+          <h1 class="text-5xl font-black tracking-tighter uppercase text-white leading-none">
+            System <span class="text-blue-500">Hosts</span>
+          </h1>
+          <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.3em] mt-4">
+            Region: us-east-2 // Status: <span class="text-green-500">Operational</span>
+          </p>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl group hover:border-blue-500/30 transition-all">
+          <Cloud class="text-blue-500 mb-6 group-hover:scale-110 transition-transform" size={24} />
+          <h3 class="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-2">Compute Cost</h3>
+          <p class="text-4xl font-mono font-bold text-white" id="host-cost">$0.00</p>
+        </div>
+
+        <div class="p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl group hover:border-green-500/30 transition-all">
+          <Activity class="text-green-500 mb-6 group-hover:scale-110 transition-transform" size={24} />
+          <h3 class="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-2">Network Egress</h3>
+          <p class="text-4xl font-mono font-bold text-white" id="host-egress">0.0 MB</p>
+        </div>
+
+        <div class="p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl group hover:border-purple-500/30 transition-all">
+          <ShieldCheck class="text-purple-500 mb-6 group-hover:scale-110 transition-transform" size={24} />
+          <h3 class="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-2">Security Tier</h3>
+          <p class="text-4xl font-bold text-white">IAM-V3</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01]">
+          <Database class="text-blue-500/40 mb-6" size={20} />
+          <h4 class="text-lg font-bold text-white mb-2">DynamoDB Metrics</h4>
+          <p class="text-white/40 text-sm leading-relaxed mb-6">Real-time visitor state persistence across global edge nodes.</p>
+          <div class="flex gap-4">
+             <span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-[10px] font-bold uppercase">NoSQL</span>
+             <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase">Active</span>
+          </div>
+        </div>
+
+        <div class="p-10 rounded-[3rem] border border-white/5 bg-white/[0.01]">
+          <HardDrive class="text-purple-500/40 mb-6" size={20} />
+          <h4 class="text-lg font-bold text-white mb-2">S3 Object Storage</h4>
+          <p class="text-white/40 text-sm leading-relaxed mb-6">Media assets and build artifacts distributed via Ohio regional bucket.</p>
+          <div class="flex gap-4">
+             <span class="px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-[10px] font-bold uppercase">Standard-IA</span>
+             <span class="px-3 py-1 rounded-full bg-green-500/10 text-green-500 text-[10px] font-bold uppercase">Active</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function fetchHostData() {
+      try {
+        const res = await fetch('/api/telemetry');
+        const data = await res.json();
+        
+        const cEl = document.getElementById('host-cost');
+        const eEl = document.getElementById('host-egress');
+        
+        if (cEl) cEl.innerText = `$${data.cost || "0.00"}`;
+        if (eEl) eEl.innerText = `${(data.egress / 1024 / 1024).toFixed(2)} MB`;
+      } catch (e) {
+        console.error("Infrastructure link severed.");
+      }
+    }
+    fetchHostData();
+  </script>
+</Layout>
