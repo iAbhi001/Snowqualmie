@@ -6,7 +6,7 @@ import ProjectGrid from '../components/ProjectGrid.tsx';
 import LinkedInCard from '../components/LinkedInCard.tsx';
 import CertificationGrid from '../components/CertificationGrid.tsx';
 import Navbar from '../components/Navbar.astro';
-import { Mail, Cpu, Database, Cloud, Code2, Banknote } from 'lucide-react';
+import { Mail, Cpu, Database, Cloud, Code2, Banknote, Activity, ShieldCheck } from 'lucide-react';
 
 export const prerender = false;
 ---
@@ -33,8 +33,8 @@ export const prerender = false;
     class="fixed bottom-8 right-8 z-50 cursor-move select-none touch-none group"
   >
     <a href="/hosts" id="island-link" class="block" ondragstart="return false;">
-      <div class="flex items-center gap-4 px-5 py-4 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:border-blue-500/30 transition-all duration-500 shadow-2xl active:scale-95 pointer-events-auto">
-        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors pointer-events-none">
+      <div class="flex items-center gap-4 px-5 py-4 rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl hover:border-blue-500/40 hover:bg-white/[0.05] transition-all duration-500 shadow-[0_20px_50px_rgba(0,0,0,0.5)] active:scale-95 pointer-events-auto">
+        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-500 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 pointer-events-none">
           <Banknote size={20} />
         </div>
         <div class="flex flex-col pr-2 pointer-events-none">
@@ -62,40 +62,44 @@ export const prerender = false;
           <p class="text-[clamp(1rem,2.2vw,1.4rem)] text-white font-semibold tracking-tight leading-none uppercase">
             Purdue University
           </p>
-          <p class="text-blue-400/60 text-[clamp(0.7rem,0.9vw,0.8rem)] font-bold uppercase tracking-[0.5em] mt-5">
-            M.S. Student in <span class="text-white/80">Computer Science</span>
+          <p class="text-blue-400/60 text-[clamp(0.7rem,0.9vw,0.8rem)] font-bold uppercase tracking-[0.5em] mt-5 flex items-center justify-end gap-3">
+             <span class="h-px w-8 bg-blue-500/20"></span> M.S. Student in <span class="text-white/80">Computer Science</span>
           </p>
         </div>
       </div>
     </section>
 
     <section class="w-full py-10 px-[5vw] flex items-center justify-center -mt-20 mb-20">
-      <div class="flex items-center gap-3 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:border-blue-500/30 transition-colors duration-500">
-        <div class="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] animate-pulse"></div>
-        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-          Global Visitors: <span id="visitor-count" class="text-blue-500 font-extrabold ml-1">000000</span>
+      <div class="flex items-center gap-3 px-6 py-3 rounded-full border border-white/5 bg-white/[0.02] backdrop-blur-2xl hover:border-blue-500/30 transition-colors duration-500 group">
+        <div class="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.8)] animate-pulse"></div>
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors">
+          Global Visitors: <span id="visitor-count" class="text-blue-500 font-extrabold ml-1 font-mono">000000</span>
         </p>
       </div>
     </section>
 
     <div class="w-full bg-white/[0.01] border-y border-white/5 py-8 backdrop-blur-sm overflow-hidden whitespace-nowrap mb-20 relative">
         <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-black to-transparent z-10"></div>
-        <div class="absolute inset-y-0 right-0 w-32 bg-gradient-l from-black to-transparent z-10"></div>
+        <div class="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-black to-transparent z-10"></div>
         <div class="inline-block animate-marquee">
             <div class="inline-flex items-center gap-16 px-8 text-[11px] font-bold uppercase tracking-[0.3em] text-white/30">
+                <span class="flex items-center gap-2 hover:text-blue-400 transition-colors cursor-default"><Code2 size={13} class="text-blue-500"/> React</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2 hover:text-blue-400 transition-colors cursor-default"><Cpu size={13} class="text-blue-500"/> TypeScript</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2 hover:text-blue-400 transition-colors cursor-default"><Cloud size={13} class="text-blue-500"/> AWS Cloud</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2 hover:text-blue-400 transition-colors cursor-default"><Database size={13} class="text-blue-500"/> DynamoDB</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2 hover:text-blue-400 transition-colors cursor-default"><Code2 size={13} class="text-blue-500"/> Astro</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2 hover:text-blue-400 transition-colors cursor-default"><Cpu size={13} class="text-blue-500"/> Node.js</span>
+                <span class="text-white/10">//</span>
+                <span class="flex items-center gap-2 hover:text-blue-400 transition-colors cursor-default"><Database size={13} class="text-blue-500"/> Python</span>
+                <span class="text-white/10">//</span>
                 <span class="flex items-center gap-2"><Code2 size={13} class="text-blue-500"/> React</span>
                 <span class="text-white/10">//</span>
                 <span class="flex items-center gap-2"><Cpu size={13} class="text-blue-500"/> TypeScript</span>
-                <span class="text-white/10">//</span>
-                <span class="flex items-center gap-2"><Cloud size={13} class="text-blue-500"/> AWS Cloud</span>
-                <span class="text-white/10">//</span>
-                <span class="flex items-center gap-2"><Database size={13} class="text-blue-500"/> DynamoDB</span>
-                <span class="text-white/10">//</span>
-                <span class="flex items-center gap-2"><Code2 size={13} class="text-blue-500"/> Astro</span>
-                <span class="text-white/10">//</span>
-                <span class="flex items-center gap-2"><Cpu size={13} class="text-blue-500"/> Node.js</span>
-                <span class="text-white/10">//</span>
-                <span class="flex items-center gap-2"><Database size={13} class="text-blue-500"/> Python</span>
             </div>
         </div>
     </div>
@@ -104,9 +108,10 @@ export const prerender = false;
       <div class="max-w-5xl w-full">
         <h2 class="section-title">Statistical Performance</h2>
         <a href="/leetcode" class="block group relative cursor-pointer">
-            <div class="backdrop-blur-3xl rounded-[2.5rem] border border-white/5 bg-white/[0.01] p-2 transition-all duration-500 group-hover:border-blue-500/30 group-hover:bg-white/[0.02]">
-                <div class="absolute top-6 right-10 z-20 text-blue-500/40 group-hover:text-blue-500 transition-colors pointer-events-none">
-                    <span class="text-[9px] font-bold uppercase tracking-widest flex items-center gap-2">Intelligence Dashboard <Code2 size={12}/></span>
+            <div class="backdrop-blur-3xl rounded-[2.5rem] border border-white/5 bg-white/[0.01] p-2 transition-all duration-700 group-hover:border-blue-500/30 group-hover:bg-white/[0.02] group-hover:shadow-[0_0_50px_rgba(59,130,246,0.05)]">
+                <div class="absolute top-6 right-10 z-20 text-blue-500/40 group-hover:text-blue-500 transition-colors pointer-events-none flex items-center gap-2">
+                    <span class="text-[9px] font-bold uppercase tracking-widest">Intelligence Dashboard</span>
+                    <Activity size={12} class="animate-pulse"/>
                 </div>
                 <LeetCodeCard client:only="react" /> 
             </div>
@@ -119,7 +124,9 @@ export const prerender = false;
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-24 gap-12">
           <div class="max-w-xl text-left">
             <h3 class="section-subtitle">System Architecture</h3>
-            <p class="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em]">Deployment Pipeline Verified.</p>
+            <p class="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+              <ShieldCheck size={12} class="text-green-500/50" /> Deployment Pipeline Verified.
+            </p>
           </div>
           <h2 class="text-[clamp(3rem,8vw,6rem)] font-extrabold uppercase tracking-tight text-white leading-none">Core <span class="text-blue-500">Builds</span></h2>
         </div>
@@ -136,9 +143,9 @@ export const prerender = false;
 
     <section id="contact" class="min-h-[80vh] w-full py-32 px-[5vw] flex items-center justify-center">
       <div class="max-w-3xl w-full text-center">
-        <div class="group p-16 md:p-24 rounded-[3rem] border border-white/5 bg-white/[0.01] backdrop-blur-3xl transition-all">
+        <div class="group p-16 md:p-24 rounded-[3rem] border border-white/5 bg-white/[0.01] backdrop-blur-3xl transition-all hover:bg-white/[0.02] hover:border-white/10">
           <h2 class="text-[clamp(2rem,5vw,4rem)] font-extrabold text-white uppercase tracking-tight mb-12 leading-none">Contact <span class="text-blue-500">Me</span></h2>
-          <a href="mailto:mulpm01@purdue.edu" class="inline-flex flex-col items-center gap-6 px-12 py-10 rounded-[2rem] bg-white/5 border border-white/5 hover:border-blue-500/20 transition-all duration-500">
+          <a href="mailto:mulpm01@purdue.edu" class="inline-flex flex-col items-center gap-6 px-12 py-10 rounded-[2rem] bg-white/5 border border-white/5 hover:border-blue-500/20 hover:scale-[1.02] transition-all duration-500">
             <Mail size={28} class="text-blue-500" />
             <span class="text-[clamp(0.9rem,2.5vw,1.4rem)] font-bold text-white tracking-widest break-all">mulpm01@purdue.edu</span>
           </a>
@@ -240,7 +247,9 @@ export const prerender = false;
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Hide scrollbar but allow scrolling */
   ::-webkit-scrollbar { display: none; }
+  body { -ms-overflow-style: none; scrollbar-width: none; }
 
   .hero-name {
     font-family: "Edu NSW ACT Cursive", cursive;
@@ -261,6 +270,7 @@ export const prerender = false;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
   }
 
+  /* Entrance Animations */
   .animate-name-slide-up { animation: nameSlideUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
   .animate-tagline-slide-down { animation: taglineSlideDown 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards; }
   .animate-details-fade { animation: detailsFade 1.5s ease-out 0.8s forwards; }
@@ -278,12 +288,16 @@ export const prerender = false;
   .section-title { @apply text-white/30 font-bold tracking-[0.6em] text-center text-[9px] uppercase mb-20; }
   .section-subtitle { @apply font-bold text-blue-500 uppercase tracking-[0.4em] mb-4 text-[9px]; }
 
-  #stars, #stars2, #stars3 { position: absolute; inset: 0; background: transparent; }
-  #stars { width: 1px; height: 1px; box-shadow: 1452px 1451px #FFF, 246px 1452px #FFF, 1234px 12px #FFF, 456px 890px #FFF; animation: animStar 50s linear infinite; }
-  #stars2 { width: 2px; height: 2px; box-shadow: 123px 456px #FFF, 789px 123px #FFF; animation: animStar 100s linear infinite; }
-  #stars3 { width: 3px; height: 3px; box-shadow: 500px 500px #FFF, 1200px 800px #FFF; animation: animStar 150s linear infinite; }
+  /* Star Field */
+  #stars, #stars2, #stars3 { position: absolute; inset: 0; background: transparent; pointer-events: none; }
+  #stars { width: 1px; height: 1px; box-shadow: 1452px 1451px #FFF, 246px 1452px #FFF, 1234px 12px #FFF, 456px 890px #FFF; animation: animStar 150s linear infinite; }
+  #stars2 { width: 2px; height: 2px; box-shadow: 123px 456px #FFF, 789px 123px #FFF; animation: animStar 200s linear infinite; }
+  #stars3 { width: 3px; height: 3px; box-shadow: 500px 500px #FFF, 1200px 800px #FFF; animation: animStar 250s linear infinite; }
 
   @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
-  .animate-marquee { display: inline-block; animation: marquee 40s linear infinite; }
+
+  /* Marquee Logic */
+  .animate-marquee { display: inline-block; animation: marquee 60s linear infinite; }
   @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  .animate-marquee:hover { animation-play-state: paused; }
 </style>
