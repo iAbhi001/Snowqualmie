@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Navbar from '../components/Navbar.astro';
 import EarthCanvas from '../components/EarthCanvas.tsx';
-import { Trophy, Flame, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Trophy, Flame, CheckCircle2, ArrowLeft, Activity } from 'lucide-react';
 
 export const prerender = false;
 ---
@@ -22,20 +22,23 @@ export const prerender = false;
     <div class="max-w-6xl mx-auto">
       
       <header class="mb-12">
-        <a href="/" class="inline-flex items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest mb-6 hover:gap-3 transition-all">
-          <ArrowLeft size={14} /> Back to Nexus
+        <a href="/" class="inline-flex items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest mb-6 hover:gap-3 transition-all group">
+          <ArrowLeft size={14} class="group-hover:-translate-x-1 transition-transform" /> Back to Nexus
         </a>
-        <h1 class="text-5xl font-black tracking-tighter uppercase leading-none">
-          Algo <span class="text-blue-500">Metrics</span>
-        </h1>
-        <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.4em] mt-4">
-          Live LeetCode Intelligence // Established Link
+        <div class="flex items-end gap-4">
+          <h1 class="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-none">
+            Algo <span class="text-blue-500">Metrics</span>
+          </h1>
+          <div class="hidden md:block h-1 w-12 bg-blue-500 mb-2"></div>
+        </div>
+        <p class="text-white/30 text-[10px] font-bold uppercase tracking-[0.4em] mt-4 flex items-center gap-2">
+          <Activity size={12} class="animate-pulse text-blue-500/50" /> Live LeetCode Intelligence // Established Link
         </p>
       </header>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div class="p-6 rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-3xl border-b-yellow-500/20 group hover:bg-white/[0.04] transition-all">
-          <Trophy class="text-yellow-500 mb-4" size={20} />
+          <Trophy class="text-yellow-500 mb-4 group-hover:scale-110 transition-transform" size={20} />
           <p class="text-[10px] font-bold uppercase text-white/30 tracking-widest">Total Solved</p>
           <p class="text-3xl font-mono font-bold" id="total-solved">---</p>
         </div>
@@ -54,15 +57,19 @@ export const prerender = false;
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.01] backdrop-blur-3xl">
-          <h3 class="text-sm font-bold uppercase tracking-widest flex items-center gap-2 mb-8">
+        <div class="lg:col-span-2 p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.01] backdrop-blur-3xl relative overflow-hidden group">
+          <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <Flame size={120} />
+          </div>
+          <h3 class="text-sm font-bold uppercase tracking-widest flex items-center gap-2 mb-8 relative z-10">
             <Flame size={18} class="text-orange-500" /> Contribution Matrix
           </h3>
-          <div class="flex justify-center bg-white/[0.02] rounded-3xl p-6 overflow-hidden">
+          <div class="flex justify-center bg-black/20 rounded-3xl p-6 overflow-hidden border border-white/5">
              <img 
                src="https://leetcard.jacoblin.cool/mmulpuri?theme=dark&font=Inter" 
-               alt="Heatmap" 
+               alt="LeetCode Heatmap" 
                class="max-w-full h-auto select-none transition-transform duration-700 hover:scale-[1.02]"
+               loading="lazy"
              />
           </div>
         </div>
@@ -72,9 +79,9 @@ export const prerender = false;
             <CheckCircle2 size={18} class="text-blue-500" /> Recent Accepted
           </h3>
           <div id="recent-submissions" class="space-y-3">
-             <div class="h-16 w-full rounded-2xl bg-white/5 animate-pulse"></div>
-             <div class="h-16 w-full rounded-2xl bg-white/5 animate-pulse"></div>
-             <div class="h-16 w-full rounded-2xl bg-white/5 animate-pulse"></div>
+             {Array(3).fill(0).map(() => (
+               <div class="h-16 w-full rounded-2xl bg-white/5 animate-pulse border border-white/5"></div>
+             ))}
           </div>
         </div>
       </div>
@@ -82,9 +89,15 @@ export const prerender = false;
   </main>
 
   <script>
+    const CONFIG = {
+      API_ENDPOINT: '/api/leetcode',
+      REFRESH_RATE: 60000 // 1 minute
+    };
+
     function timeAgo(ts) {
       if (!ts) return "Recently";
       const seconds = Math.floor((Date.now() / 1000) - Number(ts));
+      if (seconds < 60) return "Just now";
       if (seconds < 3600) return Math.floor(seconds/60) + "m ago";
       if (seconds < 86400) return Math.floor(seconds/3600) + "h ago";
       return Math.floor(seconds/86400) + "d ago";
@@ -92,56 +105,97 @@ export const prerender = false;
 
     async function updateDashboard() {
       try {
-        const res = await fetch('/api/leetcode');
+        const res = await fetch(CONFIG.API_ENDPOINT);
+        if (!res.ok) throw new Error('Network response was not ok');
         const data = await res.json();
 
-        // Safety check for DOM elements
-        const els = {
-          total: document.getElementById('total-solved'),
-          easy: document.getElementById('easy-solved'),
-          medium: document.getElementById('medium-solved'),
-          hard: document.getElementById('hard-solved')
+        // Update Stats with short-circuiting for safety
+        const setVal = (id, val) => {
+          const el = document.getElementById(id);
+          if (el) el.innerText = val ?? '0';
         };
 
-        if (els.total) els.total.innerText = data.totalSolved ?? '0';
-        if (els.easy) els.easy.innerText = data.easySolved ?? '0';
-        if (els.medium) els.medium.innerText = data.mediumSolved ?? '0';
-        if (els.hard) els.hard.innerText = data.hardSolved ?? '0';
+        setVal('total-solved', data.totalSolved);
+        setVal('easy-solved', data.easySolved);
+        setVal('medium-solved', data.mediumSolved);
+        setVal('hard-solved', data.hardSolved);
 
         const container = document.getElementById('recent-submissions');
-        if(container && data.recentSubmissions) {
+        if (container && data.recentSubmissions) {
           if (data.recentSubmissions.length === 0) {
-            container.innerHTML = `<p class="text-white/20 text-[10px] uppercase text-center py-10">No recent transmissions</p>`;
+            container.innerHTML = `<div class="py-12 text-center opacity-20 text-[10px] uppercase font-bold tracking-widest">No recent transmissions</div>`;
             return;
           }
           
-          container.innerHTML = data.recentSubmissions.map(sub => `
+          container.innerHTML = data.recentSubmissions.slice(0, 5).map(sub => `
             <div class="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-blue-500/30 hover:bg-white/[0.05] transition-all group">
-              <div class="overflow-hidden">
+              <div class="overflow-hidden mr-2">
                 <p class="text-[11px] font-bold text-white/80 truncate group-hover:text-blue-400 transition-colors">${sub.title}</p>
                 <p class="text-[9px] text-white/30 uppercase mt-1 tracking-tighter">${timeAgo(sub.timestamp)}</p>
               </div>
-              <div class="flex items-center gap-2">
-                 <div class="h-1 w-1 rounded-full bg-green-500 animate-pulse"></div>
-                 <span class="text-[9px] font-black text-green-500 ml-1">AC</span>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                 <div class="h-1.5 w-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse"></div>
+                 <span class="text-[9px] font-black text-green-500">AC</span>
               </div>
             </div>
           `).join('');
         }
       } catch (e) { 
-        console.error("Sync Error");
+        console.error("Dashboard Sync Error:", e);
         const container = document.getElementById('recent-submissions');
-        if(container) container.innerHTML = `<p class="text-red-500/50 text-[10px] uppercase text-center py-10 font-bold">Connection Lost</p>`;
+        if (container) {
+          container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-10 opacity-50">
+              <p class="text-red-500 text-[10px] uppercase font-bold tracking-[0.2em]">Connection Lost</p>
+              <button onclick="window.location.reload()" class="mt-4 text-[9px] border border-white/10 px-3 py-1 rounded-full hover:bg-white/5">Retry Link</button>
+            </div>`;
+        }
       }
     }
+
+    // Initial load
     updateDashboard();
+    // Auto-refresh every minute
+    setInterval(updateDashboard, CONFIG.REFRESH_RATE);
   </script>
 </Layout>
 
 <style is:global>
-  #stars, #stars2, #stars3 { position: absolute; inset: 0; background: transparent; pointer-events: none; }
-  #stars { width: 1px; height: 1px; box-shadow: 1452px 1451px #FFF, 246px 1452px #FFF, 1234px 12px #FFF, 456px 890px #FFF; animation: animStar 50s linear infinite; }
-  #stars2 { width: 2px; height: 2px; box-shadow: 123px 456px #FFF, 789px 123px #FFF; animation: animStar 100s linear infinite; }
-  #stars3 { width: 3px; height: 3px; box-shadow: 500px 500px #FFF, 1200px 800px #FFF; animation: animStar 150s linear infinite; }
-  @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
+  /* Star Animation Tweaks */
+  #stars, #stars2, #stars3 { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    background: transparent; 
+    pointer-events: none; 
+  }
+  
+  #stars { 
+    width: 1px; height: 1px; 
+    box-shadow: 1452px 1451px #FFF, 246px 1452px #FFF, 1234px 12px #FFF, 456px 890px #FFF, 800px 200px #FFF, 100px 1000px #FFF; 
+    animation: animStar 150s linear infinite; 
+  }
+  
+  #stars2 { 
+    width: 2px; height: 2px; 
+    box-shadow: 123px 456px #FFF, 789px 123px #FFF, 1500px 200px #FFF, 300px 1200px #FFF; 
+    animation: animStar 200s linear infinite; 
+  }
+  
+  #stars3 { 
+    width: 3px; height: 3px; 
+    box-shadow: 500px 500px #FFF, 1200px 800px #FFF, 200px 10px #FFF; 
+    animation: animStar 250s linear infinite; 
+  }
+
+  @keyframes animStar { 
+    from { transform: translateY(0px); } 
+    to { transform: translateY(-2000px); } 
+  }
+
+  /* Custom Scrollbar for a cleaner look */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.5); }
 </style>
