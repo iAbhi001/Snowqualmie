@@ -11,7 +11,7 @@ import { Mail, Cpu, Database, Cloud, Code2, Banknote, Activity, ShieldCheck } fr
 export const prerender = false;
 ---
 
-<Layout title="Abhiram | Portfolio">
+<Layout title="Snowqualmie">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Cursive:wght@400..700&family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
@@ -116,6 +116,13 @@ export const prerender = false;
                 <LeetCodeCard client:only="react" /> 
             </div>
         </a>
+      </div>
+    </section>
+
+    <section id="professional" class="w-full flex flex-col items-center justify-center px-[5vw] py-32">
+      <div class="max-w-7xl w-full flex flex-col items-center">
+        <h2 class="section-title">Network Synchronization</h2>
+        <LinkedInCard client:load />
       </div>
     </section>
 
