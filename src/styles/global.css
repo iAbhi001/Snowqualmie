@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* 1. GLOBAL FLUID VARIABLES & FONTS */
 :root {
   --fluid-hello: clamp(5rem, 18vw, 15rem);
   --fluid-hero: clamp(4rem, 22vw, 20rem);
@@ -11,60 +10,53 @@
     scroll-behavior: smooth;
     background-color: #030303;
     color: white;
-    /* Enforce Bricolage as the primary UI font */
+    /* This ensures Bricolage is the default for everything except where we specify Playwrite */
     font-family: 'Bricolage Grotesque', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-
+  
   body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
     width: 100%;
-    min-height: 100vh;
   }
 }
 
 @layer components {
-  /* 2. RESPONSIVE GLASS CARD */
+  /* Restore the Glass Card Styling */
   .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     padding: clamp(1rem, 3vw, 2.5rem); 
     border-radius: clamp(1.5rem, 4vw, 3rem);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     width: 100%;
-    transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .glass-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(59, 130, 246, 0.3);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(59, 130, 246, 0.2);
   }
 }
 
-/* 3. UTILITY CLASSES */
-.content-wrapper {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 5vw;
-}
-
-/* Scrollbar reset */
-::-webkit-scrollbar {
-  display: none;
-}
-
-/* Fluid Hero Font (Backup for script sections) */
+/* Fluid Hero Font Utility */
 .hello-font {
   font-family: 'Playwrite BR', cursive;
   font-size: var(--fluid-hello); 
   color: white;
   text-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
   line-height: 1;
-  overflow: visible; 
   display: block;
 }
+
+/* Custom Selection */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+::-webkit-scrollbar { display: none; }
